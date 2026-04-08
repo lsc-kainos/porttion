@@ -26,6 +26,9 @@ Plataforma multipágina em Streamlit para análise de ativos com candlestick e a
 
 ```text
 app.py
+Procfile
+railway.json
+runtime.txt
 pages/
   home.py
   carteira.py
@@ -63,6 +66,26 @@ pip install -r requirements.txt
 ```bash
 streamlit run app.py
 ```
+
+## Deploy no Railway
+
+Este repositório já está preparado para deploy no Railway com:
+
+- `Procfile` com comando web
+- `railway.json` com build/deploy
+- `runtime.txt` para fixar versão do Python
+
+### Passo a passo
+
+1. Crie um novo projeto no Railway conectando este repositório.
+2. No serviço, configure as variáveis:
+   - `OPENAI_API_KEY` (obrigatória para análise com IA)
+   - `OPENAI_MODEL` (opcional, padrão no app: `gpt-4o-mini`)
+3. Faça deploy (o Railway usa `NIXPACKS` automaticamente via `railway.json`).
+4. Abra a URL pública gerada pelo Railway.
+
+Observação:
+- A variável `PORT` é injetada automaticamente pelo Railway e usada no start command.
 
 ## Configuração
 
@@ -103,4 +126,3 @@ Contribuições são bem-vindas.
 ## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE).
-
