@@ -5,7 +5,7 @@ import streamlit as st
 from services.config import init_config_state
 from services.portfolio import init_portfolio_state
 
-st.set_page_config(page_title="Plataforma de Candlesticks com IA", layout="wide")
+st.set_page_config(page_title="Porttion — Portfolio Evaluation", layout="wide")
 
 init_config_state()
 init_portfolio_state()

@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 from services.local_storage import get_local_json, remove_local_key, set_local_json
 
 CONFIG_FILE = Path("config.json")
-CONFIG_STORAGE_KEY = "vallet_manager_config"
+CONFIG_STORAGE_KEY = "porttion_portfolio_evaluation_config"
+LEGACY_CONFIG_STORAGE_KEY = "vallet_manager_config"
 DEFAULT_MODEL = "gpt-4o-mini"
 MODEL_OPTIONS = ["gpt-4o-mini", "gpt-4o", "gpt-5"]
 _INIT_FLAG = "_config_initialized"
@@ -38,8 +39,13 @@ def init_config_state() -> None:
 
     load_dotenv()
     browser_config = get_local_json(CONFIG_STORAGE_KEY)
+    legacy_browser_config = get_local_json(LEGACY_CONFIG_STORAGE_KEY)
     file_config = _load_file_config()
-    persisted_config = browser_config if isinstance(browser_config, dict) else file_config
+    persisted_config = (
+        browser_config
+        if isinstance(browser_config, dict)
+        else legacy_browser_config if isinstance(legacy_browser_config, dict) else file_config
+    )
     persisted_persistence = str(persisted_config.get("persistence", "")).lower()
 
     st.session_state["api_key"] = (
@@ -62,7 +68,17 @@ def init_config_state() -> None:
         )
     )
 
-    if not isinstance(browser_config, dict) and file_config:
+    if isinstance(legacy_browser_config, dict) and not isinstance(browser_config, dict):
+        set_local_json(
+            CONFIG_STORAGE_KEY,
+            {
+                "api_key": st.session_state["api_key"],
+                "model": st.session_state["model"],
+                "persistence": st.session_state["config_persistence"],
+            },
+        )
+
+    if not isinstance(browser_config, dict) and not isinstance(legacy_browser_config, dict) and file_config:
         set_local_json(
             CONFIG_STORAGE_KEY,
             {
@@ -102,8 +118,10 @@ def apply_config(api_key: str, model: str, persistence: str = "session") -> None
             CONFIG_STORAGE_KEY,
             {"api_key": clean_key, "model": clean_model, "persistence": clean_persistence},
         )
+        remove_local_key(LEGACY_CONFIG_STORAGE_KEY)
     else:
         remove_local_key(CONFIG_STORAGE_KEY)
+        remove_local_key(LEGACY_CONFIG_STORAGE_KEY)
 
     if clean_persistence == "local":
         _save_file_config(
@@ -115,6 +133,7 @@ def apply_config(api_key: str, model: str, persistence: str = "session") -> None
 
 def clear_local_config() -> None:
     remove_local_key(CONFIG_STORAGE_KEY)
+    remove_local_key(LEGACY_CONFIG_STORAGE_KEY)
     if CONFIG_FILE.exists():
         CONFIG_FILE.unlink()
     st.session_state["api_key"] = ""

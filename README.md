@@ -1,4 +1,4 @@
-# Vallet Manager
+# Porttion — Portfolio Evaluation
 
 Plataforma multipágina em Streamlit para análise de ativos com candlestick e apoio de IA.
 

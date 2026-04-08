@@ -13,7 +13,8 @@ from services.local_storage import get_local_json, set_local_json
 from services.portfolio import get_portfolio, init_portfolio_state
 from services.report_export import markdown_to_pdf_bytes
 
-REPORT_STORAGE_KEY = "vallet_manager_report"
+REPORT_STORAGE_KEY = "porttion_portfolio_evaluation_report"
+LEGACY_REPORT_STORAGE_KEY = "vallet_manager_report"
 _REPORT_HYDRATED_FLAG = "_report_local_storage_hydrated"
 
 
@@ -67,6 +68,10 @@ init_portfolio_state()
 
 if not st.session_state.get(_REPORT_HYDRATED_FLAG):
     persisted_report = get_local_json(REPORT_STORAGE_KEY)
+    legacy_persisted_report = get_local_json(LEGACY_REPORT_STORAGE_KEY)
+    if not isinstance(persisted_report, dict) and isinstance(legacy_persisted_report, dict):
+        persisted_report = legacy_persisted_report
+        set_local_json(REPORT_STORAGE_KEY, legacy_persisted_report)
     if isinstance(persisted_report, dict):
         persisted_results = persisted_report.get("results")
         persisted_markdown = persisted_report.get("markdown")

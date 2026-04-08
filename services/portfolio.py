@@ -9,7 +9,8 @@ from services.data_provider import normalize_ticker, validate_and_resolve_ticker
 from services.local_storage import get_local_json, set_local_json
 
 PORTFOLIO_FILE = Path("portfolio.json")
-PORTFOLIO_STORAGE_KEY = "vallet_manager_portfolio"
+PORTFOLIO_STORAGE_KEY = "porttion_portfolio_evaluation_portfolio"
+LEGACY_PORTFOLIO_STORAGE_KEY = "vallet_manager_portfolio"
 _PORTFOLIO_KEY = "portfolio"
 _INIT_FLAG = "_portfolio_initialized"
 
@@ -67,13 +68,20 @@ def init_portfolio_state() -> None:
     else:
         file_portfolio = _deduplicate(_load_file_portfolio())
         local_portfolio = get_local_json(PORTFOLIO_STORAGE_KEY)
+        legacy_local_portfolio = get_local_json(LEGACY_PORTFOLIO_STORAGE_KEY)
         local_normalized = _deduplicate(local_portfolio) if isinstance(local_portfolio, list) else []
+        legacy_local_normalized = (
+            _deduplicate(legacy_local_portfolio) if isinstance(legacy_local_portfolio, list) else []
+        )
 
         if file_portfolio:
             st.session_state[_PORTFOLIO_KEY] = file_portfolio
             set_local_json(PORTFOLIO_STORAGE_KEY, file_portfolio)
         elif local_normalized:
             st.session_state[_PORTFOLIO_KEY] = local_normalized
+        elif legacy_local_normalized:
+            st.session_state[_PORTFOLIO_KEY] = legacy_local_normalized
+            set_local_json(PORTFOLIO_STORAGE_KEY, legacy_local_normalized)
         else:
             st.session_state[_PORTFOLIO_KEY] = []
 
