@@ -23,8 +23,20 @@ function isRateLimited(pathname: string): boolean {
 
 const SENSITIVE_AUTH_LIMIT = 10;
 
+// Paths that are public and must bypass the auth middleware.
+const PUBLIC_PATHS = ['/', '/signup'];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.includes(pathname);
+}
+
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Public pages (landing and signup) need no auth check.
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith('/api/auth/')) {
     if (rateLimitEnabled() && isRateLimited(pathname)) {

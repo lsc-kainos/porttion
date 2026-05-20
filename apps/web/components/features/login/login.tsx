@@ -123,7 +123,7 @@ export function Login() {
               onSubmit={handleFormSubmit}
             >
               <input type="hidden" name="csrfToken" value={csrfToken} />
-              <input type="hidden" name="callbackUrl" value="/" />
+              <input type="hidden" name="callbackUrl" value="/dashboard" />
               <Button
                 type="submit"
                 variant="outline"
@@ -142,7 +142,7 @@ export function Login() {
               onSubmit={handleFormSubmit}
             >
               <input type="hidden" name="csrfToken" value={csrfToken} />
-              <input type="hidden" name="callbackUrl" value="/" />
+              <input type="hidden" name="callbackUrl" value="/dashboard" />
               <Button
                 type="submit"
                 variant="outline"

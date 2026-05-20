@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   API_URL: z.string().url().default('http://localhost:3001'),
+  NEXT_PUBLIC_API_URL: z.string().url().default('http://localhost:3001'),
   NEXTAUTH_URL: z.string().url().default('http://localhost:3000'),
   NEXTAUTH_SECRET: z.string().min(32),
   GOOGLE_CLIENT_ID: z.string().min(1),
@@ -24,6 +25,7 @@ function load(): Env {
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     cached = {
       API_URL: process.env.API_URL ?? 'http://localhost:3001',
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001',
       NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
       NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? '',
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? '',
@@ -36,6 +38,7 @@ function load(): Env {
   }
   cached = schema.parse({
     API_URL: process.env.API_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

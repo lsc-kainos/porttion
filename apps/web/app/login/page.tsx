@@ -10,7 +10,7 @@ export const metadata = { title: 'Entrar · Invoices' };
 // é redirecionado pra home antes de renderizar qualquer form.
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
-  if (session?.user) redirect('/');
+  if (session?.user) redirect('/dashboard');
 
   return (
     <Suspense>
