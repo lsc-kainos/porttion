@@ -1,9 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
-import { getCsrfToken } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/layout/logo';
 import { GoogleLogo } from './google-logo';
 import { GithubLogo } from './github-logo';
@@ -13,16 +16,17 @@ const ERROR_KEYS = [
   'AccessDenied',
   'Verification',
   'OAuthAccountNotLinked',
+  'CredentialsSignin',
+  'EmailNotVerified',
   'Default',
 ] as const;
 type ErrorKey = (typeof ERROR_KEYS)[number];
 
-const slide = 'animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both';
-
 export function Login() {
-  const t = useTranslations('login');
+  const t = useTranslations('auth.login');
   const tErr = useTranslations('auth.errors');
   const params = useSearchParams();
+  const router = useRouter();
   const errorParam = params.get('error');
   const errorKey: ErrorKey | null = errorParam
     ? (ERROR_KEYS as readonly string[]).includes(errorParam)
@@ -30,145 +34,88 @@ export function Login() {
       : 'Default'
     : null;
 
-  const [csrfToken, setCsrfToken] = useState('');
-  useEffect(() => {
-    getCsrfToken().then((token) => setCsrfToken(token ?? ''));
-  }, []);
+  const [submitting, setSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<ErrorKey | null>(null);
 
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    if (csrfToken) return;
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const token = await getCsrfToken();
-    if (!token) return;
-    setCsrfToken(token);
-    const csrfInput = form.querySelector('input[name="csrfToken"]') as HTMLInputElement | null;
-    if (csrfInput) {
-      csrfInput.value = token;
-      form.submit();
+    setSubmitting(true);
+    setLocalError(null);
+    const data = new FormData(e.currentTarget);
+    const res = await signIn('credentials', {
+      email: String(data.get('email') ?? ''),
+      password: String(data.get('password') ?? ''),
+      redirect: false,
+    });
+    setSubmitting(false);
+    if (!res || res.error) {
+      const key: ErrorKey =
+        res?.error === 'EmailNotVerified' ? 'EmailNotVerified' : 'CredentialsSignin';
+      setLocalError(key);
+      return;
     }
-  };
+    router.replace('/dashboard');
+  }
+
+  const visibleError: ErrorKey | null = localError ?? errorKey;
 
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-      {/* Editorial column - desktop only */}
-      <div
-        className="border-border/40 bg-background relative hidden flex-col justify-between border-r px-8 py-8 lg:flex lg:px-14 lg:py-10"
-        style={{
-          backgroundImage:
-            'radial-gradient(ellipse at 70% 20%, oklch(0.15 0.06 40 / 0.10) 0%, transparent 60%)',
-        }}
-      >
-        <div className={`${slide} duration-500`}>
-          <Logo size={28} />
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-8 px-6 py-12">
+      <Logo href="/" />
+      <header className="flex flex-col gap-2">
+        <h1 className="text-2xl font-medium">{t('title')}</h1>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
+      </header>
+
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email">{t('email_label')}</Label>
+          <Input id="email" name="email" type="email" required autoComplete="email" />
         </div>
-        <div className="flex max-w-[420px] flex-col gap-5">
-          <h1 className="animate-in fade-in-0 zoom-in-95 fill-mode-both text-foreground text-3xl font-semibold tracking-tight delay-300 duration-1000 lg:text-4xl">
-            {t('headline')}
-          </h1>
-          <p
-            className={`${slide} text-muted-foreground text-sm leading-relaxed delay-[900ms] duration-700 lg:text-base`}
-          >
-            {t('subtitle')}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="password">{t('password_label')}</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+          />
+        </div>
+        {visibleError ? (
+          <p className="text-sm text-[var(--destructive)]" role="alert">
+            {tErr(visibleError)}
           </p>
-        </div>
-        <span className={`${slide} text-muted-foreground text-xs delay-[1400ms] duration-500`}>
-          {t('tagline')}
-        </span>
+        ) : null}
+        <Button type="submit" disabled={submitting}>
+          {submitting ? '…' : t('submit')}
+        </Button>
+        <Link href="/forgot-password" className="text-muted-foreground text-sm underline">
+          {t('forgot')}
+        </Link>
+      </form>
+
+      <div className="text-muted-foreground flex items-center gap-3 text-xs tracking-[0.14em] uppercase">
+        <span className="h-px flex-1 bg-[var(--border)]" />
+        {t('or')}
+        <span className="h-px flex-1 bg-[var(--border)]" />
       </div>
 
-      {/* Auth card - full width on mobile, centered on desktop */}
-      <div className="flex items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
-        <div className="w-full max-w-[360px]">
-          {/* Mobile mini hero */}
-          <div className="mb-8 flex flex-col gap-3 sm:mb-10 lg:hidden">
-            <div className={`${slide} duration-500`}>
-              <Logo size={28} />
-            </div>
-            <h1 className="animate-in fade-in-0 zoom-in-95 fill-mode-both text-foreground text-xl font-semibold tracking-tight delay-150 duration-700 sm:text-2xl">
-              {t('headline')}
-            </h1>
-            <p
-              className={`${slide} text-muted-foreground text-sm leading-relaxed delay-300 duration-500`}
-            >
-              {t('subtitle')}
-            </p>
-          </div>
-
-          <h2
-            className={`${slide} text-xl font-medium tracking-tight delay-200 duration-700 sm:text-2xl`}
-          >
-            {t('card.title')}
-          </h2>
-          <p
-            className={`${slide} text-muted-foreground mt-2 mb-6 text-[13px] leading-relaxed delay-500 duration-700`}
-          >
-            {t('card.subtitle')}
-          </p>
-
-          {errorKey && (
-            <div
-              role="alert"
-              className="border-destructive/30 bg-destructive/10 text-destructive mb-4 rounded-md border px-3 py-2 text-sm"
-            >
-              {tErr(errorKey)}
-            </div>
-          )}
-
-          <div className={`${slide} flex flex-col gap-2.5 delay-700 duration-700`}>
-            <form
-              action="/api/auth/signin/google"
-              method="POST"
-              className="contents"
-              onSubmit={handleFormSubmit}
-            >
-              <input type="hidden" name="csrfToken" value={csrfToken} />
-              <input type="hidden" name="callbackUrl" value="/dashboard" />
-              <Button
-                type="submit"
-                variant="outline"
-                size="lg"
-                className="border-primary/20 hover:border-primary/40 hover:bg-primary/5 w-full justify-center gap-2.5 transition-all hover:shadow-[0_0_20px_-5px_var(--primary)] active:scale-[0.98]"
-                aria-label={t('card.google')}
-              >
-                <GoogleLogo size={15} />
-                {t('card.google')}
-              </Button>
-            </form>
-            <form
-              action="/api/auth/signin/github"
-              method="POST"
-              className="contents"
-              onSubmit={handleFormSubmit}
-            >
-              <input type="hidden" name="csrfToken" value={csrfToken} />
-              <input type="hidden" name="callbackUrl" value="/dashboard" />
-              <Button
-                type="submit"
-                variant="outline"
-                size="lg"
-                className="border-primary/20 hover:border-primary/40 hover:bg-primary/5 w-full justify-center gap-2.5 transition-all hover:shadow-[0_0_20px_-5px_var(--primary)] active:scale-[0.98]"
-                aria-label={t('card.github')}
-              >
-                <GithubLogo size={15} />
-                {t('card.github')}
-              </Button>
-            </form>
-          </div>
-
-          <div
-            className={`${slide} border-border/40 text-muted-foreground mt-6 border-t pt-4 text-[11px] leading-relaxed delay-1000 duration-500`}
-          >
-            <a href="#" className="hover:underline">
-              {t('card.terms')}
-            </a>{' '}
-            ·{' '}
-            <a href="#" className="hover:underline">
-              {t('card.privacy')}
-            </a>
-          </div>
-        </div>
+      <div className="flex flex-col gap-3">
+        <Button variant="outline" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
+          <GoogleLogo /> {t('google')}
+        </Button>
+        <Button variant="outline" onClick={() => signIn('github', { callbackUrl: '/dashboard' })}>
+          <GithubLogo /> {t('github')}
+        </Button>
       </div>
-    </div>
+
+      <p className="text-muted-foreground text-sm">
+        {t('no_account')}{' '}
+        <Link href="/signup" className="underline">
+          {t('go_to_signup')}
+        </Link>
+      </p>
+    </main>
   );
 }

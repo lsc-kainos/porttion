@@ -82,7 +82,9 @@
       "success_title": "Senha alterada",
       "success_body": "Você já pode entrar com a nova senha.",
       "error_title": "Link inválido ou expirado",
-      "error_body": "Solicite um novo link na tela de esqueci a senha."
+      "error_body": "Solicite um novo link na tela de esqueci a senha.",
+      "go_to_login": "Ir para login",
+      "request_new_link": "Pedir novo link"
     },
     "errors": {
       "Configuration": "Erro de configuração da autenticação.",
@@ -108,19 +110,6 @@
       "theme_dark": "Escuro",
       "theme_system": "Sistema",
       "logout": "Sair"
-    }
-  },
-  "login": {
-    "headline": "Bem-vindo ao Porttion.",
-    "subtitle": "Entre para acompanhar sua carteira.",
-    "tagline": "Porttion · análise com IA",
-    "card": {
-      "title": "Entrar",
-      "subtitle": "Use o provedor da sua conta.",
-      "google": "Continuar com Google",
-      "github": "Continuar com GitHub",
-      "terms": "Termos",
-      "privacy": "Privacidade"
     }
   },
   "home": {

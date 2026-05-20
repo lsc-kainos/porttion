@@ -29,7 +29,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <h2 className="text-xl font-medium">{t('success_title')}</h2>
         <p className="text-muted-foreground text-sm">{t('success_body')}</p>
         <Button asChild>
-          <Link href="/login">{t('success_title')}</Link>
+          <Link href="/login">{t('go_to_login')}</Link>
         </Button>
       </div>
     );
@@ -41,7 +41,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <h2 className="text-xl font-medium">{t('error_title')}</h2>
         <p className="text-muted-foreground text-sm">{t('error_body')}</p>
         <Button variant="outline" asChild>
-          <Link href="/forgot-password">{t('error_title')}</Link>
+          <Link href="/forgot-password">{t('request_new_link')}</Link>
         </Button>
       </div>
     );
