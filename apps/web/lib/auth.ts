@@ -85,6 +85,38 @@ export const authOptions: NextAuthOptions = {
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
+    CredentialsProvider({
+      id: 'credentials',
+      name: 'Credenciais',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Senha', type: 'password' },
+      },
+      authorize: async (creds) => {
+        if (!creds?.email || !creds?.password) return null;
+        const res = await internalFetch('/api/v1/internal/auth/validate', {
+          method: 'POST',
+          body: JSON.stringify({ email: creds.email, password: creds.password }),
+        });
+        if (!res.ok) {
+          if (res.status === 401) {
+            const body = (await res.json().catch(() => ({}))) as { message?: string };
+            if (body.message?.toLowerCase().includes('não verificado')) {
+              throw new Error('EmailNotVerified');
+            }
+            throw new Error('CredentialsSignin');
+          }
+          throw new Error('Default');
+        }
+        const user = (await res.json()) as {
+          id: string;
+          email: string;
+          name: string | null;
+          avatar: string | null;
+        };
+        return { id: user.id, email: user.email, name: user.name, image: user.avatar };
+      },
+    }),
     // E2E_TEST=1 ativa o provider de credenciais usado pelos testes
     // Playwright. NODE_ENV sozinho não basta porque `next dev` força
     // NODE_ENV=development; usamos uma flag dedicada.
