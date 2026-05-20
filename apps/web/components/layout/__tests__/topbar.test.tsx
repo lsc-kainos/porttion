@@ -27,10 +27,10 @@ function renderTopbar(role: 'USER' | 'ADMIN' = 'USER') {
 }
 
 describe('<Topbar />', () => {
-  it('Desktop nav: Início aparece como link ativo apontando para /', () => {
+  it('Desktop nav: Início aparece como link ativo apontando para /dashboard', () => {
     renderTopbar();
     const nav = screen.getByRole('navigation', { name: /primary/i });
-    expect(within(nav).getByRole('link', { name: 'Início' })).toHaveAttribute('href', '/');
+    expect(within(nav).getByRole('link', { name: 'Início' })).toHaveAttribute('href', '/dashboard');
   });
 
   it('Desktop nav só aparece em lg+ (hidden lg:flex)', () => {

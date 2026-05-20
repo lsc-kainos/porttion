@@ -27,7 +27,10 @@ export class EmailService {
       html,
     });
     if (error) {
-      this.logger.error(`Resend error: ${error.message}`);
+      // Não logar `error.message` direto — pode conter PII (ex.: email do destinatário).
+      const safeName =
+        (error as { name?: string })?.name ?? 'UnknownResendError';
+      this.logger.error(`Resend error: ${safeName}`);
       throw new Error(`Email send failed: ${error.message}`);
     }
   }

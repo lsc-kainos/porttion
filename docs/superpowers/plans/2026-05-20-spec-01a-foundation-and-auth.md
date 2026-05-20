@@ -9,6 +9,7 @@
 **Tech Stack:** Next.js 16 + NextAuth v4 (Credentials) · NestJS 11 + Prisma 6 + Zod · Resend (HTML strings, sem React Email no MVP) · bcryptjs (puro JS, sem deps nativas) · Tailwind v4 + shadcn/ui · next-intl · GitHub Actions.
 
 **Pré-requisitos para começar:**
+
 - Spec 00 aprovada (`docs/superpowers/specs/2026-05-20-spec-00-roadmap.md`).
 - Conta Resend criada com domain auth (SPF/DKIM/DMARC) configurada.
 - Variáveis `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL` disponíveis para dev (env.local) e Railway (staging).
@@ -92,6 +93,7 @@ docs/architecture.md                         # link para spec 00 e este plano
 ## Task 1: Instalar dependências novas
 
 **Files:**
+
 - Modify: `apps/api/package.json`
 - Modify: `apps/web/package.json` (nenhuma adição obrigatória, mas vamos confirmar zod)
 
@@ -122,6 +124,7 @@ git commit -m "chore(api): add resend and bcryptjs"
 ## Task 2: Estender env schema com Resend e APP_URL
 
 **Files:**
+
 - Modify: `apps/api/src/config/env.schema.ts`
 - Test: `apps/api/src/config/env.schema.spec.ts` (existe — estender)
 
@@ -148,7 +151,12 @@ describe('email and app url', () => {
 
   it('exige EMAIL_FROM válido', () => {
     expect(() =>
-      validateEnv({ ...base, RESEND_API_KEY: 're_x', EMAIL_FROM: 'naoEhEmail', APP_URL: 'http://x' }),
+      validateEnv({
+        ...base,
+        RESEND_API_KEY: 're_x',
+        EMAIL_FROM: 'naoEhEmail',
+        APP_URL: 'http://x',
+      }),
     ).toThrow(/EMAIL_FROM/);
   });
 
@@ -214,6 +222,7 @@ git commit -m "feat(api): require RESEND_API_KEY, EMAIL_FROM, APP_URL in env sch
 ## Task 3: Estender Prisma schema com auth email/senha
 
 **Files:**
+
 - Modify: `apps/api/prisma/schema.prisma`
 - Create: `apps/api/prisma/migrations/<timestamp>_auth_email/migration.sql` (gerado)
 
@@ -296,6 +305,7 @@ git commit -m "feat(api): extend User and add EmailToken for credential auth"
 ## Task 4: EmailService com adapter Resend
 
 **Files:**
+
 - Create: `apps/api/src/email/email.module.ts`
 - Create: `apps/api/src/email/email.service.ts`
 - Test: `apps/api/src/email/email.service.spec.ts`
@@ -323,8 +333,9 @@ export function verifyEmailHtml(params: { name: string | null; verifyUrl: string
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
   );
 }
 const escapeAttr = escapeHtml;
@@ -349,8 +360,9 @@ export function resetPasswordHtml(params: { name: string | null; resetUrl: strin
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
   );
 }
 const escapeAttr = escapeHtml;
@@ -394,9 +406,9 @@ describe('EmailService', () => {
 
   it('lança erro se Resend devolver error', async () => {
     sendMock.mockResolvedValue({ data: null, error: { message: 'invalid api key' } });
-    await expect(
-      service.send({ to: 'u@x.com', subject: 's', html: '<p/>' }),
-    ).rejects.toThrow(/invalid api key/);
+    await expect(service.send({ to: 'u@x.com', subject: 's', html: '<p/>' })).rejects.toThrow(
+      /invalid api key/,
+    );
   });
 });
 ```
@@ -479,6 +491,7 @@ git commit -m "feat(api): add EmailService backed by Resend"
 ## Task 5: EmailTokenService (gera, hasheia, valida tokens)
 
 **Files:**
+
 - Create: `apps/api/src/auth/email-verification/email-token.service.ts`
 - Test: `apps/api/src/auth/email-verification/email-token.service.spec.ts`
 
@@ -651,6 +664,7 @@ git commit -m "feat(api): add EmailTokenService with hashed tokens and consume g
 ## Task 6: CredentialsService (signup + validate)
 
 **Files:**
+
 - Create: `apps/api/src/auth/credentials/credentials.service.ts`
 - Test: `apps/api/src/auth/credentials/credentials.service.spec.ts`
 - Create: `apps/api/src/auth/credentials/dto/signup.dto.ts`
@@ -714,7 +728,11 @@ describe('CredentialsService', () => {
   describe('signup', () => {
     it('cria usuário, gera token VERIFY 24h e envia email', async () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-      (prisma.user.create as jest.Mock).mockResolvedValue({ id: 'u1', email: 'a@b.com', name: 'A' });
+      (prisma.user.create as jest.Mock).mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        name: 'A',
+      });
       (tokens.issue as jest.Mock).mockResolvedValue('rawtoken');
       (email.send as jest.Mock).mockResolvedValue(undefined);
 
@@ -724,7 +742,11 @@ describe('CredentialsService', () => {
       expect(created.email).toBe('a@b.com');
       expect(created.passwordHash).not.toBe('senha12345');
       expect(await bcrypt.compare('senha12345', created.passwordHash)).toBe(true);
-      expect(tokens.issue).toHaveBeenCalledWith({ userId: 'u1', kind: 'VERIFY', ttlMinutes: 60 * 24 });
+      expect(tokens.issue).toHaveBeenCalledWith({
+        userId: 'u1',
+        kind: 'VERIFY',
+        ttlMinutes: 60 * 24,
+      });
       expect(email.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'a@b.com',
@@ -781,9 +803,9 @@ describe('CredentialsService', () => {
         passwordHash: hash,
         emailVerifiedAt: null,
       });
-      await expect(
-        service.validate({ email: 'a@b.com', password: 'senha12345' }),
-      ).rejects.toThrow(/não verificado/i);
+      await expect(service.validate({ email: 'a@b.com', password: 'senha12345' })).rejects.toThrow(
+        /não verificado/i,
+      );
     });
 
     it('rejeita 401 se passwordHash é null (conta criada por OAuth)', async () => {
@@ -812,11 +834,7 @@ Expected: FAIL (módulo não existe).
 `apps/api/src/auth/credentials/credentials.service.ts`:
 
 ```typescript
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -920,6 +938,7 @@ git commit -m "feat(api): add CredentialsService for signup + validate"
 ## Task 7: EmailVerificationService (verify, forgot, reset)
 
 **Files:**
+
 - Create: `apps/api/src/auth/email-verification/email-verification.service.ts`
 - Test: `apps/api/src/auth/email-verification/email-verification.service.spec.ts`
 - Create: `apps/api/src/auth/email-verification/dto/verify.dto.ts`
@@ -997,7 +1016,11 @@ describe('EmailVerificationService', () => {
   });
 
   it('forgotPassword(): se email existe, emite RESET 30min e envia email', async () => {
-    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'u1', email: 'a@b.com', name: 'A' });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 'u1',
+      email: 'a@b.com',
+      name: 'A',
+    });
     (tokens.issue as jest.Mock).mockResolvedValue('rawtoken');
     await service.forgotPassword({ email: 'a@b.com' });
     expect(tokens.issue).toHaveBeenCalledWith({ userId: 'u1', kind: 'RESET', ttlMinutes: 30 });
@@ -1115,6 +1138,7 @@ git commit -m "feat(api): add EmailVerificationService for verify/forgot/reset"
 ## Task 8: Internal Credentials Controller (S2S /auth/validate)
 
 **Files:**
+
 - Create: `apps/api/src/auth/credentials/internal-credentials.controller.ts`
 - Test: `apps/api/src/auth/credentials/internal-credentials.controller.spec.ts`
 
@@ -1141,7 +1165,12 @@ describe('InternalCredentialsController', () => {
   });
 
   it('POST /internal/auth/validate delega ao service', async () => {
-    (service.validate as jest.Mock).mockResolvedValue({ id: 'u1', email: 'a@b.com', name: 'A', avatar: null });
+    (service.validate as jest.Mock).mockResolvedValue({
+      id: 'u1',
+      email: 'a@b.com',
+      name: 'A',
+      avatar: null,
+    });
     const res = await controller.validate({ email: 'a@b.com', password: 'p' });
     expect(service.validate).toHaveBeenCalledWith({ email: 'a@b.com', password: 'p' });
     expect(res).toEqual({ id: 'u1', email: 'a@b.com', name: 'A', avatar: null });
@@ -1197,6 +1226,7 @@ git commit -m "feat(api): internal endpoint for credential validation (S2S)"
 ## Task 9: Public Auth Controller (signup, verify, forgot, reset)
 
 **Files:**
+
 - Create: `apps/api/src/auth/email-verification/email-verification.controller.ts`
 - Test: `apps/api/src/auth/email-verification/email-verification.controller.spec.ts`
 
@@ -1234,7 +1264,11 @@ describe('AuthController', () => {
 
   it('POST /auth/signup', async () => {
     await controller.signup({ email: 'a@b.com', name: 'A', password: 'senha12345' });
-    expect(credentials.signup).toHaveBeenCalledWith({ email: 'a@b.com', name: 'A', password: 'senha12345' });
+    expect(credentials.signup).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      name: 'A',
+      password: 'senha12345',
+    });
   });
 
   it('POST /auth/verify', async () => {
@@ -1337,6 +1371,7 @@ git commit -m "feat(api): public auth endpoints for signup/verify/forgot/reset"
 ## Task 10: Cabear módulos no AppModule + ThrottlerModule bucket
 
 **Files:**
+
 - Create: `apps/api/src/email/email.module.ts` (já criado em Task 4)
 - Create: `apps/api/src/auth/credentials/credentials.module.ts`
 - Create: `apps/api/src/auth/email-verification/email-verification.module.ts`
@@ -1447,6 +1482,7 @@ git commit -m "feat(api): wire credentials + email-verification modules and auth
 ## Task 11: Smoke E2E manual — signup → verify
 
 **Files:**
+
 - nenhum arquivo modificado; verificação manual
 
 - [ ] **Step 1: Subir DB + API**
@@ -1504,6 +1540,7 @@ Não há commit nesta task — é gate manual antes de seguir.
 ## Task 12: Fontes — Inter, Instrument Serif, JetBrains Mono
 
 **Files:**
+
 - Modify: `apps/web/app/layout.tsx`
 - Modify: `apps/web/app/globals.css`
 - Create: `apps/web/fonts/InstrumentSerif-Italic.woff2`
@@ -1585,6 +1622,7 @@ git commit -m "feat(web): add Inter, JetBrains Mono, Instrument Serif fonts"
 ## Task 13: Paleta OpenClaw + tokens estendidos
 
 **Files:**
+
 - Modify: `apps/web/app/globals.css`
 - Modify: `apps/web/components/ui/badge.tsx`
 
@@ -1632,7 +1670,7 @@ Localizar o bloco `:root { ... }` e `.dark { ... }` (ou `@theme`). Substituir pe
   --danger-muted: oklch(0.96 0.06 27);
   --danger-muted-foreground: oklch(0.42 0.18 27);
 
-  --chart-1: oklch(0.81 0.10 252);
+  --chart-1: oklch(0.81 0.1 252);
   --chart-2: oklch(0.62 0.19 260);
   --chart-3: oklch(0.55 0.22 263);
   --chart-4: oklch(0.49 0.22 264);
@@ -1669,7 +1707,7 @@ Localizar o bloco `:root { ... }` e `.dark { ... }` (ou `@theme`). Substituir pe
 
   --success: oklch(0.72 0.18 150);
   --success-foreground: oklch(0.05 0 0);
-  --success-muted: oklch(0.20 0.08 150);
+  --success-muted: oklch(0.2 0.08 150);
   --success-muted-foreground: oklch(0.82 0.14 150);
 
   --warning: oklch(0.78 0.16 80);
@@ -1677,7 +1715,7 @@ Localizar o bloco `:root { ... }` e `.dark { ... }` (ou `@theme`). Substituir pe
   --warning-muted: oklch(0.22 0.08 80);
   --warning-muted-foreground: oklch(0.84 0.14 80);
 
-  --danger-muted: oklch(0.22 0.10 27);
+  --danger-muted: oklch(0.22 0.1 27);
   --danger-muted-foreground: oklch(0.84 0.18 27);
 }
 ```
@@ -1716,6 +1754,7 @@ git commit -m "feat(web): apply OpenClaw palette + success/warning/danger badge 
 ## Task 14: Logo do Porttion (P azul vívido)
 
 **Files:**
+
 - Modify: `apps/web/components/layout/logo.tsx`
 
 - [ ] **Step 1: Substituir o componente**
@@ -1737,13 +1776,11 @@ export function Logo({ href = '/', className, showWordmark = true }: LogoProps) 
     <Link href={href} className={cn('inline-flex items-center gap-2', className)}>
       <span
         aria-hidden
-        className="grid h-8 w-8 place-items-center rounded-md bg-[oklch(0.62_0.19_260)] text-white text-sm font-semibold"
+        className="grid h-8 w-8 place-items-center rounded-md bg-[oklch(0.62_0.19_260)] text-sm font-semibold text-white"
       >
         P
       </span>
-      {showWordmark ? (
-        <span className="text-base font-medium tracking-tight">Porttion</span>
-      ) : null}
+      {showWordmark ? <span className="text-base font-medium tracking-tight">Porttion</span> : null}
     </Link>
   );
 }
@@ -1769,6 +1806,7 @@ git commit -m "feat(web): rebrand Logo to Porttion mark (blue P)"
 ## Task 15: i18n — reestruturar pt-BR.json por feature
 
 **Files:**
+
 - Modify: `apps/web/messages/pt-BR.json`
 
 - [ ] **Step 1: Substituir conteúdo do arquivo**
@@ -1905,6 +1943,7 @@ git commit -m "feat(web): restructure i18n by feature (auth, landing, common, to
 ## Task 16: Script de validação i18n + GitHub Action
 
 **Files:**
+
 - Create: `apps/web/scripts/i18n-check.ts`
 - Create: `.github/workflows/i18n-check.yml`
 - Modify: `apps/web/package.json` (script `i18n:check`)
@@ -2039,6 +2078,7 @@ git commit -m "ci(web): add i18n-check script and GitHub Action"
 ## Task 17: NextAuth Credentials provider (produção)
 
 **Files:**
+
 - Modify: `apps/web/lib/auth.ts`
 
 - [ ] **Step 1: Adicionar provider de produção**
@@ -2098,7 +2138,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../internal-api', () => ({ internalFetch: vi.fn() }));
 vi.mock('../env', () => ({
-  env: { GOOGLE_CLIENT_ID: 'g', GOOGLE_CLIENT_SECRET: 'g', GITHUB_CLIENT_ID: 'h', GITHUB_CLIENT_SECRET: 'h', NEXTAUTH_SECRET: 'a'.repeat(32) },
+  env: {
+    GOOGLE_CLIENT_ID: 'g',
+    GOOGLE_CLIENT_SECRET: 'g',
+    GITHUB_CLIENT_ID: 'h',
+    GITHUB_CLIENT_SECRET: 'h',
+    NEXTAUTH_SECRET: 'a'.repeat(32),
+  },
 }));
 vi.mock('../secret-fingerprint', () => ({ secretFingerprint: () => 'fp' }));
 
@@ -2114,7 +2160,9 @@ describe('Credentials provider', () => {
 
   it('retorna user em 200', async () => {
     vi.mocked(internalFetch).mockResolvedValue(
-      new Response(JSON.stringify({ id: 'u1', email: 'a@b.com', name: 'A', avatar: null }), { status: 200 }) as any,
+      new Response(JSON.stringify({ id: 'u1', email: 'a@b.com', name: 'A', avatar: null }), {
+        status: 200,
+      }) as any,
     );
     const res = await credentialsProvider().authorize({ email: 'a@b.com', password: 'p' });
     expect(res).toEqual({ id: 'u1', email: 'a@b.com', name: 'A', image: null });
@@ -2165,6 +2213,7 @@ git commit -m "feat(web): NextAuth Credentials provider for email/password login
 ## Task 18: Tela de Signup
 
 **Files:**
+
 - Create: `apps/web/app/(public)/layout.tsx`
 - Create: `apps/web/app/(public)/page.tsx`
 - Create: `apps/web/app/(public)/signup/page.tsx`
@@ -2178,7 +2227,7 @@ git commit -m "feat(web): NextAuth Credentials provider for email/password login
 import type { ReactNode } from 'react';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  return <div className="min-h-screen bg-background text-foreground">{children}</div>;
+  return <div className="bg-background text-foreground min-h-screen">{children}</div>;
 }
 ```
 
@@ -2204,14 +2253,16 @@ export default function LandingPage() {
         </div>
       </header>
       <section className="flex max-w-2xl flex-col gap-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-muted-foreground text-xs tracking-[0.14em] uppercase">
           01 ─── Análise de ativos com IA
         </p>
         <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
-          Entenda o que está <span className="font-serif italic">acontecendo</span> com a sua carteira.
+          Entenda o que está <span className="font-serif italic">acontecendo</span> com a sua
+          carteira.
         </h1>
-        <p className="text-base text-muted-foreground md:text-lg">
-          Landing completa virá na F1d. Esta é uma versão placeholder enquanto a fundação é construída.
+        <p className="text-muted-foreground text-base md:text-lg">
+          Landing completa virá na F1d. Esta é uma versão placeholder enquanto a fundação é
+          construída.
         </p>
       </section>
     </main>
@@ -2273,9 +2324,7 @@ export function SignupForm() {
     return (
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-medium">{t('success_title')}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t('success_body', { email })}
-        </p>
+        <p className="text-muted-foreground text-sm">{t('success_body', { email })}</p>
       </div>
     );
   }
@@ -2292,14 +2341,21 @@ export function SignupForm() {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">{t('password_label')}</Label>
-        <Input id="password" name="password" type="password" required minLength={10} maxLength={128} />
-        <p className="text-xs text-muted-foreground">{t('password_hint')}</p>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          required
+          minLength={10}
+          maxLength={128}
+        />
+        <p className="text-muted-foreground text-xs">{t('password_hint')}</p>
       </div>
       {errorMsg ? <p className="text-sm text-[var(--destructive)]">{errorMsg}</p> : null}
       <Button type="submit" disabled={state === 'submitting'}>
         {state === 'submitting' ? '…' : t('submit')}
       </Button>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t('already_have_account')}{' '}
         <Link href="/login" className="underline">
           {t('go_to_login')}
@@ -2324,7 +2380,7 @@ export default function SignupPage() {
       <Logo href="/" />
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-medium">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
       </header>
       <SignupForm />
     </main>
@@ -2358,6 +2414,7 @@ git commit -m "feat(web): signup page with email/password and confirmation flow"
 ## Task 19: Tela de Verify Email
 
 **Files:**
+
 - Create: `apps/web/app/(public)/verify-email/[token]/page.tsx`
 
 - [ ] **Step 1: Page (server component que chama a API e renderiza estado)**
@@ -2373,12 +2430,15 @@ interface PageProps {
 }
 
 async function verify(token: string): Promise<'ok' | 'error'> {
-  const res = await fetch(`${process.env.API_URL_INTERNAL ?? process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ token }),
-    cache: 'no-store',
-  });
+  const res = await fetch(
+    `${process.env.API_URL_INTERNAL ?? process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token }),
+      cache: 'no-store',
+    },
+  );
   return res.ok ? 'ok' : 'error';
 }
 
@@ -2393,7 +2453,7 @@ export default async function VerifyEmailPage({ params }: PageProps) {
       {status === 'ok' ? (
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-medium">{t('success_title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('success_body')}</p>
+          <p className="text-muted-foreground text-sm">{t('success_body')}</p>
           <Button asChild>
             <Link href="/login">{t('go_to_login')}</Link>
           </Button>
@@ -2401,7 +2461,7 @@ export default async function VerifyEmailPage({ params }: PageProps) {
       ) : (
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-medium">{t('error_title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('error_body')}</p>
+          <p className="text-muted-foreground text-sm">{t('error_body')}</p>
           <Button variant="outline" asChild>
             <Link href="/login">{t('go_to_login')}</Link>
           </Button>
@@ -2428,6 +2488,7 @@ git commit -m "feat(web): verify-email page consumes /auth/verify"
 ## Task 20: Tela de Forgot Password
 
 **Files:**
+
 - Create: `apps/web/app/(public)/forgot-password/page.tsx`
 - Create: `apps/web/components/features/auth/forgot-password-form.tsx`
 
@@ -2465,7 +2526,7 @@ export function ForgotPasswordForm() {
     return (
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-medium">{t('submitted_title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('submitted_body', { email })}</p>
+        <p className="text-muted-foreground text-sm">{t('submitted_body', { email })}</p>
       </div>
     );
   }
@@ -2498,7 +2559,7 @@ export default function ForgotPasswordPage() {
       <Logo href="/" />
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-medium">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
       </header>
       <ForgotPasswordForm />
     </main>
@@ -2518,6 +2579,7 @@ git commit -m "feat(web): forgot-password page"
 ## Task 21: Tela de Reset Password
 
 **Files:**
+
 - Create: `apps/web/app/(public)/reset-password/[token]/page.tsx`
 - Create: `apps/web/components/features/auth/reset-password-form.tsx`
 
@@ -2553,7 +2615,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     return (
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-medium">{t('success_title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('success_body')}</p>
+        <p className="text-muted-foreground text-sm">{t('success_body')}</p>
         <Button asChild>
           <Link href="/login">Ir para login</Link>
         </Button>
@@ -2565,7 +2627,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     return (
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-medium">{t('error_title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('error_body')}</p>
+        <p className="text-muted-foreground text-sm">{t('error_body')}</p>
         <Button variant="outline" asChild>
           <Link href="/forgot-password">Pedir novo link</Link>
         </Button>
@@ -2577,8 +2639,15 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">{t('password_label')}</Label>
-        <Input id="password" name="password" type="password" required minLength={10} maxLength={128} />
-        <p className="text-xs text-muted-foreground">{t('password_hint')}</p>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          required
+          minLength={10}
+          maxLength={128}
+        />
+        <p className="text-muted-foreground text-xs">{t('password_hint')}</p>
       </div>
       <Button type="submit" disabled={state === 'submitting'}>
         {state === 'submitting' ? '…' : t('submit')}
@@ -2624,6 +2693,7 @@ git commit -m "feat(web): reset-password page"
 ## Task 22: Refatorar Login para email/senha + OAuth
 
 **Files:**
+
 - Modify: `apps/web/components/features/login/login.tsx`
 - Modify: `apps/web/app/login/page.tsx` (mover para `(public)/login/page.tsx`)
 
@@ -2706,7 +2776,7 @@ export function Login() {
       <Logo href="/" />
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-medium">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
       </header>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -2716,7 +2786,13 @@ export function Login() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">{t('password_label')}</Label>
-          <Input id="password" name="password" type="password" required autoComplete="current-password" />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+          />
         </div>
         {visibleError ? (
           <p className="text-sm text-[var(--destructive)]" role="alert">
@@ -2726,12 +2802,12 @@ export function Login() {
         <Button type="submit" disabled={submitting}>
           {submitting ? '…' : t('submit')}
         </Button>
-        <Link href="/forgot-password" className="text-sm text-muted-foreground underline">
+        <Link href="/forgot-password" className="text-muted-foreground text-sm underline">
           {t('forgot')}
         </Link>
       </form>
 
-      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-3 text-xs tracking-[0.14em] uppercase">
         <span className="h-px flex-1 bg-[var(--border)]" />
         {t('or')}
         <span className="h-px flex-1 bg-[var(--border)]" />
@@ -2746,7 +2822,7 @@ export function Login() {
         </Button>
       </div>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t('no_account')}{' '}
         <Link href="/signup" className="underline">
           {t('go_to_signup')}
@@ -2776,6 +2852,7 @@ Atualizar quaisquer testes que apontavam para `login.*` (template antigo) para u
 - [ ] **Step 5: Smoke**
 
 `npm run dev`, abrir `/login`. Fluxo:
+
 1. Tentar entrar com email recém-verificado da Task 11.
 2. Conferir redirecionamento para `/`.
 3. Sair, voltar com senha errada → ver erro `auth.errors.CredentialsSignin`.
@@ -2793,6 +2870,7 @@ git commit -m "feat(web): login form with email/password + OAuth, error mapping 
 ## Task 23: CLAUDE.md — fluxo de entrega
 
 **Files:**
+
 - Modify: `CLAUDE.md`
 
 - [ ] **Step 1: Adicionar bloco**
@@ -2846,6 +2924,7 @@ git commit -m "docs(claude): add PR-to-staging flow and i18n convention"
 ## Task 24: PR Template
 
 **Files:**
+
 - Create: `.github/pull_request_template.md`
 
 - [ ] **Step 1: Escrever template**
@@ -2879,11 +2958,11 @@ git commit -m "docs(claude): add PR-to-staging flow and i18n convention"
 
 ## Severidade da review
 
-| Sev | Descrição | Resolução |
-|---|---|---|
-| **P0** | Bug, regressão, falha de segurança, contrato quebrado | Obrigatório antes do merge |
-| **P1** | Refactor / UX / perf importante | Issue ou follow-up; não bloqueia |
-| **P2** | Nit / opinião | Opcional |
+| Sev    | Descrição                                             | Resolução                        |
+| ------ | ----------------------------------------------------- | -------------------------------- |
+| **P0** | Bug, regressão, falha de segurança, contrato quebrado | Obrigatório antes do merge       |
+| **P1** | Refactor / UX / perf importante                       | Issue ou follow-up; não bloqueia |
+| **P2** | Nit / opinião                                         | Opcional                         |
 ```
 
 - [ ] **Step 2: Commit**
@@ -3004,6 +3083,7 @@ Conferir GitHub Actions: `i18n-check` + lint/typecheck/test/build/e2e (estes úl
 ## Self-review (já executado)
 
 **1. Cobertura da spec 00:**
+
 - §2.1 Resend escolhido — coberto por Tasks 1, 2, 4
 - §2.2 Mobile-first — adiado para spec-01c (layout) e spec-01d (Playwright); aqui só formulários nativamente responsivos via Tailwind
 - §2.3 i18n centralizado em tokens com validação CI — Tasks 15, 16
@@ -3020,6 +3100,7 @@ Conferir GitHub Actions: `i18n-check` + lint/typecheck/test/build/e2e (estes úl
 **3. Type consistency:** `ValidatedUser`, `SignupInput`, `EmailTokenKind`, `EmailTokenService.issue()/.consume()` usados consistentemente entre tasks 5-10. `internalFetch` e `signIn('credentials', ...)` seguem assinaturas atuais do template e do next-auth v4.
 
 **4. Decisões registradas explicitamente:**
+
 - bcryptjs em vez de bcrypt (sem deps nativas) — Task 1
 - HTML strings em vez de React Email — Task 4
 - Sucesso silencioso em `forgotPassword` (anti-enumeração) — Task 7

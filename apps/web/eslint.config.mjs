@@ -17,13 +17,7 @@ const eslintConfig = defineConfig([
   // Block the e2e-test credentials provider id from leaking outside auth + tests.
   {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: [
-      '**/lib/auth.ts',
-      '**/*.test.ts',
-      '**/*.test.tsx',
-      '**/*.spec.ts',
-      '**/e2e/**',
-    ],
+    ignores: ['**/lib/auth.ts', '**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/e2e/**'],
     rules: {
       'no-restricted-syntax': [
         'error',

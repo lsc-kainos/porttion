@@ -27,6 +27,7 @@
 **Position-based**: snapshot de qty + avgPrice por ativo. KPIs reais a partir de OHLC do Yahoo; evolução temporal do patrimônio fica como placeholder até F5, quando substituímos o modelo por **Movement-based** (histórico de movimentações).
 
 Por que assim:
+
 - Permite KPIs reais (patrimônio, P&L, custo, variação do dia) sem construir parser de movimentações ou motor de cálculo histórico no MVP.
 - Adia decisões caras (parser de nota B3, importação CSV, double-write em migração) para fases posteriores onde já há tração.
 - O custo de migração F5 é conhecido e mitigável (script reversível + double-write).
@@ -35,23 +36,23 @@ Por que assim:
 
 ## 2. Stack e decisões técnicas
 
-| Camada | Decisão | Origem |
-|---|---|---|
-| Monorepo | npm workspaces + Turborepo | template |
-| Frontend | Next.js 16 (App Router) + shadcn/ui + Tailwind v4 + next-themes + next-intl | template |
-| Backend | NestJS 11 + Prisma 6 + class-validator + helmet + `@nestjs/throttler` | template |
-| Auth — social | NextAuth (Google + GitHub) com JWT compartilhado + S2S `INTERNAL_SERVICE_TOKEN` | template |
-| Auth — email/senha | NextAuth `Credentials` provider + bcrypt + email de verificação + reset | **novo (F1)** |
-| Email | **Resend** + React Email para templates (verify, reset, welcome opcional) | **novo (F1)** |
-| DB | PostgreSQL (dev: docker-compose; prod: Railway) | template |
-| IA | `ai-runtime` server-side (`generateObject` com Zod) — OpenAI via Vercel AI SDK | template |
-| Mercado | `yahoo-finance2` (npm) com cache em memória 5min + fallback de período/alias DOL/EUR portados do legacy | nova |
-| Tema | OpenClaw (tweakcn) substitui paleta zinc; estende com `--success/--warning/--danger-muted` do template | nova |
-| Fontes | Inter (UI) + Instrument Serif itálico (sotaque editorial) + JetBrains Mono (números) via `next/font` | nova |
-| Charts | `CandleChart` SVG próprio; donut/sparkline/area com `recharts` | meio-termo |
-| i18n | next-intl, **só pt-BR ativo** na F1, todas strings via tokens com convenção `<feature>.<scope>.<key>` | template + reforço |
-| CI/CD | GitHub Actions + Railway por branch (deploy automático em `staging`) | template |
-| Variantes Tweaks | **fora da F1** — fase 1 fixa em hero editorial + dashboard KPI Grid + sidebar expanded | recorte |
+| Camada             | Decisão                                                                                                 | Origem             |
+| ------------------ | ------------------------------------------------------------------------------------------------------- | ------------------ |
+| Monorepo           | npm workspaces + Turborepo                                                                              | template           |
+| Frontend           | Next.js 16 (App Router) + shadcn/ui + Tailwind v4 + next-themes + next-intl                             | template           |
+| Backend            | NestJS 11 + Prisma 6 + class-validator + helmet + `@nestjs/throttler`                                   | template           |
+| Auth — social      | NextAuth (Google + GitHub) com JWT compartilhado + S2S `INTERNAL_SERVICE_TOKEN`                         | template           |
+| Auth — email/senha | NextAuth `Credentials` provider + bcrypt + email de verificação + reset                                 | **novo (F1)**      |
+| Email              | **Resend** + React Email para templates (verify, reset, welcome opcional)                               | **novo (F1)**      |
+| DB                 | PostgreSQL (dev: docker-compose; prod: Railway)                                                         | template           |
+| IA                 | `ai-runtime` server-side (`generateObject` com Zod) — OpenAI via Vercel AI SDK                          | template           |
+| Mercado            | `yahoo-finance2` (npm) com cache em memória 5min + fallback de período/alias DOL/EUR portados do legacy | nova               |
+| Tema               | OpenClaw (tweakcn) substitui paleta zinc; estende com `--success/--warning/--danger-muted` do template  | nova               |
+| Fontes             | Inter (UI) + Instrument Serif itálico (sotaque editorial) + JetBrains Mono (números) via `next/font`    | nova               |
+| Charts             | `CandleChart` SVG próprio; donut/sparkline/area com `recharts`                                          | meio-termo         |
+| i18n               | next-intl, **só pt-BR ativo** na F1, todas strings via tokens com convenção `<feature>.<scope>.<key>`   | template + reforço |
+| CI/CD              | GitHub Actions + Railway por branch (deploy automático em `staging`)                                    | template           |
+| Variantes Tweaks   | **fora da F1** — fase 1 fixa em hero editorial + dashboard KPI Grid + sidebar expanded                  | recorte            |
 
 ### 2.1 Por que Resend (e não Postmark/SES/SendGrid)
 
@@ -215,6 +216,7 @@ POST   /analyst/asset                 → { ticker, days } → AssetAnalysis (ca
 ### 4.2 KPIs computados server-side
 
 Não computar no cliente. Endpoints retornam:
+
 - `patrimonio = Σ qty × quote atual`
 - `pl_total = Σ (quote - avgPrice) × qty`
 - `custo_total = Σ qty × avgPrice`
@@ -363,16 +365,19 @@ Watchlist, Movimentações (drawer e tabela), Alocação target vs atual, Análi
 **Entrega:** usuário gera relatório consolidado da carteira em Markdown e PDF; mantém uma watchlist de ativos a observar sem precisar incluí-los em carteira.
 
 **Schema:**
+
 - `WatchlistItem { userId, ticker, createdAt }` com PK composta `(userId, ticker)`.
 - `WalletReport { id, userId, walletId, markdown, generatedAt, promptVersion }`.
 
 **Backend:**
+
 - Novo módulo `analyst.wallet` com prompt `wallet.report.v1` (Markdown estruturado, formato do legacy ampliado com "Pontos fortes/atenção").
 - Novo módulo `watchlist` (CRUD).
 - Geração de PDF: portar `report_export.py` para Node — preferência por `@react-pdf/renderer` (ecossistema React) ou `puppeteer` em modo print (mais fiel mas pesado). **Decisão na spec-02.**
 - Geração de relatório roda em job BullMQ (pode demorar 30s para 10 ativos).
 
 **Frontend:**
+
 - Tela Carteira → Análise IA (estados pronto / generating com `ReportSkeleton` / done com `ReportBody`).
 - Tela Watchlist (tabela com sparkline 30d; cards em mobile).
 - Botões de download `.md` e `.pdf` no estado done.
@@ -388,10 +393,12 @@ Watchlist, Movimentações (drawer e tabela), Alocação target vs atual, Análi
 **Schema:** adiciona `targets Json?` em `Wallet` (`{ "acoes_br": 35, "etf": 20, ... }`).
 
 **Backend:**
+
 - `PATCH /wallets/:id/targets`.
 - Endpoint de "plano sugerido" computa próximo aporte por classe a partir do gap (não usa IA na F3; é determinístico).
 
 **Frontend:**
+
 - Tela Carteira → Alocação (`AllocationRow` com barra horizontal + marcador vertical do target; card de plano sugerido com aspas serifadas).
 - Variante editorial do dashboard (split com narrativa + área chart 90d + "02 · Alocação" + "03 · Posições").
 - Painel Tweaks reativado (persistência em `localStorage`), exposto só em dev por feature flag.
@@ -407,12 +414,14 @@ Watchlist, Movimentações (drawer e tabela), Alocação target vs atual, Análi
 **Schema:** `AssetChatMessage { id, userId, ticker, role, content, createdAt }` com índice `(userId, ticker, createdAt)`.
 
 **Backend:**
+
 - Novo módulo `analyst.chat` com **stream de tokens via SSE** (não REST).
 - Contexto = últimos 7 candles + análise IA mais recente daquele ticker (se houver).
 - Novo prompt `asset.chat.v1` (free-form, system prompt restritivo, temperature 0.4).
 - Rate limit dedicado: bucket `ai-chat` (50 mensagens/dia/usuário).
 
 **Frontend:**
+
 - `AssetChat` na coluna direita do detalhe do ativo (em desktop) ou bottom sheet em mobile.
 - Typing indicator (3 dots pulsando).
 - 3 sugestões iniciais (`Quais padrões aparecem?`, `Tem suporte forte?`, `Qual o maior risco?`).
@@ -426,6 +435,7 @@ Watchlist, Movimentações (drawer e tabela), Alocação target vs atual, Análi
 **Entrega:** usuário registra histórico real de movimentações; `Position` passa a ser **calculada** a partir do histórico. Desbloqueia evolução temporal real do patrimônio.
 
 **Schema novo:**
+
 ```prisma
 model Movement {
   id        String       @id @default(cuid())
@@ -444,12 +454,14 @@ enum MovementKind { COMPRA VENDA APORTE DIVIDENDO }
 ```
 
 **Migração:**
+
 - Script de migração converte cada `Position` existente em **1 `Movement` de tipo COMPRA** com `date = position.createdAt`, preservando qty/avgPrice como price.
 - **Double-write** durante rollout: writes vão para Movement e Position em paralelo por N dias, com feature flag `movement_authoritative` controlando qual é fonte de verdade dos KPIs.
 - Após estabilização, `Position` vira **view materializada** (ou tabela computada via trigger) — não mais entrada manual.
 - Script reverso documentado.
 
 **Frontend:**
+
 - Tela Carteira → Movimentações (tabela com filtros Compras/Vendas/Aportes/Proventos + 4 stats; `AddMovementSheet` com tabs por tipo).
 - Tela Dashboard ganha área chart de **Evolução do patrimônio** com tabs 7d/30d/6m/1a/5a (computa snapshots de qty + cotação histórica por data).
 
@@ -462,12 +474,14 @@ enum MovementKind { COMPRA VENDA APORTE DIVIDENDO }
 **Entrega:** usuário importa histórico de movimentações via CSV ou nota de corretagem B3 (PDF). Configurações ganha seções restantes.
 
 **Backend:**
+
 - Wizard de importação em 3 passos (Origem / Revisar / Concluído).
 - Parser CSV genérico (formato documentado: Data, ticker, qty, preço, tipo).
 - Parser de nota B3 (PDF): roda em **worker BullMQ** porque é demorado; usa `pdf-parse` + heurísticas. **Avaliar na spec-06** se serviço externo (ex.: Pluggy, Investidor10) compensa o esforço de manter parser próprio.
 - Re-uso do storage abstrato do template para armazenar o PDF original (R2 em prod, Volume em dev) por 30 dias.
 
 **Frontend:**
+
 - Wizard com stepper visual.
 - Card de "Exemplo de leitura" mostrando tabela do que será importado antes de confirmar.
 - Tela Configurações completa: Analista de IA (admin-only, gerencia prompts ativos), Notificações (4 toggles), Zona perigosa (Excluir conta).
@@ -495,15 +509,15 @@ enum MovementKind { COMPRA VENDA APORTE DIVIDENDO }
 
 ## 9. Riscos e mitigações (transversais ao roadmap)
 
-| Risco | Impacto | Mitigação |
-|---|---|---|
-| `yahoo-finance2` quebrar por scraping | KPIs vazios, análises vazias | Wrapper com fallback de período/alias do legacy; cache 5min agressivo; F2+ avaliar brapi.dev como secundário |
-| Custo OpenAI sem teto | $$ na fatura | F1 já com throttler bucket `ai-analyst` (20/dia/usuário); cache 1h em `AssetAnalysis`; F4 adiciona bucket `ai-chat` |
-| Análise IA "alucinar" e dar conselho direto | Risco regulatório CVM | Disclaimer fixo + system prompt restritivo + Zod schema sem campo "preço-alvo" |
-| Evolução do patrimônio sem dados históricos | Tela frustrante na F1 | Placeholder explícito ("Disponível após registrar movimentações" + CTA para F5); não interpolar |
-| Migração `Position` → `Movement` em F5 | Quebra de dados | Feature flag + script reversível + double-write + smoke 3 dias |
-| Deliverability de email (Resend) | Usuário não recebe verify/reset | Domain auth (SPF/DKIM/DMARC) configurado dia 1; webhook de bounce monitorado; fallback: link manual no painel admin |
-| Parser de nota B3 quebrar | Importação falha | Parser por corretora + fallback manual; F6 pode adiar para serviço externo |
+| Risco                                       | Impacto                         | Mitigação                                                                                                           |
+| ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `yahoo-finance2` quebrar por scraping       | KPIs vazios, análises vazias    | Wrapper com fallback de período/alias do legacy; cache 5min agressivo; F2+ avaliar brapi.dev como secundário        |
+| Custo OpenAI sem teto                       | $$ na fatura                    | F1 já com throttler bucket `ai-analyst` (20/dia/usuário); cache 1h em `AssetAnalysis`; F4 adiciona bucket `ai-chat` |
+| Análise IA "alucinar" e dar conselho direto | Risco regulatório CVM           | Disclaimer fixo + system prompt restritivo + Zod schema sem campo "preço-alvo"                                      |
+| Evolução do patrimônio sem dados históricos | Tela frustrante na F1           | Placeholder explícito ("Disponível após registrar movimentações" + CTA para F5); não interpolar                     |
+| Migração `Position` → `Movement` em F5      | Quebra de dados                 | Feature flag + script reversível + double-write + smoke 3 dias                                                      |
+| Deliverability de email (Resend)            | Usuário não recebe verify/reset | Domain auth (SPF/DKIM/DMARC) configurado dia 1; webhook de bounce monitorado; fallback: link manual no painel admin |
+| Parser de nota B3 quebrar                   | Importação falha                | Parser por corretora + fallback manual; F6 pode adiar para serviço externo                                          |
 
 ---
 
@@ -563,19 +577,19 @@ Promoção é manual e periódica (não automática). Após smoke test em stagin
 
 ## 13. Glossário
 
-| Termo | Significado |
-|---|---|
-| Carteira (`Wallet`) | Conjunto de ativos do usuário (ex.: "Principal", "Reserva") |
-| Posição (`Position`) | Holding atual de um ativo dentro de uma carteira (qty + avgPrice) — modelo F1 |
-| Movimentação (`Movement`) | Evento histórico: compra, venda, aporte, provento — modelo F5+ |
-| Aporte | Entrada de capital novo na carteira (TED, PIX) |
-| Provento | Dividendo, JCP ou rendimento recebido |
-| PM | Preço médio (custo dividido por quantidade) |
-| P&L | Profit & Loss — diferença entre valor de mercado e custo |
-| Target | Percentual desejado de cada classe na carteira |
-| Gap | Diferença em pontos percentuais entre atual e target |
-| OHLC | Open · High · Low · Close (dados de candle) |
-| Tendência | Direção predominante do preço (alta · baixa · lateral) |
-| Confiança | Score 0–100% da segurança da análise IA |
-| P0/P1/P2 | Severidade de comentário em PR — ver §11 |
-| BYOK | Bring Your Own Key — usuário plugar própria chave OpenAI (backlog pós-F6) |
+| Termo                     | Significado                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| Carteira (`Wallet`)       | Conjunto de ativos do usuário (ex.: "Principal", "Reserva")                   |
+| Posição (`Position`)      | Holding atual de um ativo dentro de uma carteira (qty + avgPrice) — modelo F1 |
+| Movimentação (`Movement`) | Evento histórico: compra, venda, aporte, provento — modelo F5+                |
+| Aporte                    | Entrada de capital novo na carteira (TED, PIX)                                |
+| Provento                  | Dividendo, JCP ou rendimento recebido                                         |
+| PM                        | Preço médio (custo dividido por quantidade)                                   |
+| P&L                       | Profit & Loss — diferença entre valor de mercado e custo                      |
+| Target                    | Percentual desejado de cada classe na carteira                                |
+| Gap                       | Diferença em pontos percentuais entre atual e target                          |
+| OHLC                      | Open · High · Low · Close (dados de candle)                                   |
+| Tendência                 | Direção predominante do preço (alta · baixa · lateral)                        |
+| Confiança                 | Score 0–100% da segurança da análise IA                                       |
+| P0/P1/P2                  | Severidade de comentário em PR — ver §11                                      |
+| BYOK                      | Bring Your Own Key — usuário plugar própria chave OpenAI (backlog pós-F6)     |

@@ -85,6 +85,7 @@ Este repositório já está preparado para deploy no Railway com:
 4. Abra a URL pública gerada pelo Railway.
 
 Observação:
+
 - A variável `PORT` é injetada automaticamente pelo Railway e usada no start command.
 
 ## Configuração

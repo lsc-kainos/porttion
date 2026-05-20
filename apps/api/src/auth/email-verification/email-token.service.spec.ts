@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailTokenService } from './email-token.service';
 
@@ -31,10 +32,7 @@ describe('EmailTokenService', () => {
 
   it('consume() valida hash, expiração e marca usedAt', async () => {
     const token = 'a'.repeat(64);
-    const tokenHash = require('node:crypto')
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     (prisma.emailToken.findUnique as jest.Mock).mockResolvedValue({
       id: 't1',
       userId: 'u1',
