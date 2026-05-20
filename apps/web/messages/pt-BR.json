@@ -127,5 +127,23 @@
     "title": "Workspace pronto.",
     "subtitle": "Este é o template Kainos: auth, admin, storage, fila e ai-runtime já configurados.",
     "hint": "Adicione suas features em components/features/ e routes em app/(authed)/."
+  },
+  "admin": {
+    "hub": {
+      "title": "Admin",
+      "subtitle": "Painel administrativo do sistema.",
+      "queues": {
+        "title": "Filas",
+        "description": "Monitore e gerencie as filas de processamento."
+      },
+      "metrics": {
+        "title": "Métricas",
+        "description": "Visualize métricas de uso e performance."
+      },
+      "bull": {
+        "title": "Bull Board",
+        "description": "Interface visual para gerenciamento de filas BullMQ."
+      }
+    }
   }
 }

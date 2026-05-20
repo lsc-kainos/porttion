@@ -1,0 +1,19 @@
+name: i18n-check
+on:
+  pull_request:
+    paths:
+      - 'apps/web/messages/**'
+      - 'apps/web/**/*.ts'
+      - 'apps/web/**/*.tsx'
+      - 'apps/web/scripts/i18n-check.ts'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run i18n:check --workspace=@kainos/web
