@@ -163,43 +163,37 @@ describe('validateEnv', () => {
     });
   });
 
-  describe('email and app url', () => {
-    const base = {
-      DATABASE_URL: 'postgres://u:p@h:5432/d',
-      ALLOWED_ORIGINS: 'http://localhost:3000',
-      NEXTAUTH_SECRET: 'a'.repeat(32),
-      INTERNAL_SERVICE_TOKEN: 'b'.repeat(32),
-      STORAGE_URL_SECRET: 'c'.repeat(32),
-      VOLUME_ROOT: '/tmp/storage',
-    };
-
+  describe('Email e App URL', () => {
     it('exige RESEND_API_KEY', () => {
-      expect(() => validateEnv({ ...base, EMAIL_FROM: 'no@p.io', APP_URL: 'http://x' })).toThrow(
+      expect(() => validateEnv(omit(validRaw, 'RESEND_API_KEY'))).toThrow(
         /RESEND_API_KEY/,
       );
     });
 
-    it('exige EMAIL_FROM válido', () => {
+    it('exige EMAIL_FROM', () => {
+      expect(() => validateEnv(omit(validRaw, 'EMAIL_FROM'))).toThrow(
+        /EMAIL_FROM/,
+      );
+    });
+
+    it('rejeita EMAIL_FROM inválido', () => {
       expect(() =>
-        validateEnv({ ...base, RESEND_API_KEY: 're_x', EMAIL_FROM: 'naoEhEmail', APP_URL: 'http://x' }),
+        validateEnv({ ...validRaw, EMAIL_FROM: 'naoEhEmail' }),
       ).toThrow(/EMAIL_FROM/);
     });
 
-    it('exige APP_URL url', () => {
-      expect(() =>
-        validateEnv({ ...base, RESEND_API_KEY: 're_x', EMAIL_FROM: 'no@p.io', APP_URL: 'nao-url' }),
-      ).toThrow(/APP_URL/);
+    it('exige APP_URL', () => {
+      expect(() => validateEnv(omit(validRaw, 'APP_URL'))).toThrow(/APP_URL/);
+    });
+
+    it('rejeita APP_URL inválida', () => {
+      expect(() => validateEnv({ ...validRaw, APP_URL: 'nao-url' })).toThrow(
+        /APP_URL/,
+      );
     });
 
     it('aceita os 3 campos válidos', () => {
-      expect(() =>
-        validateEnv({
-          ...base,
-          RESEND_API_KEY: 're_x',
-          EMAIL_FROM: 'no-reply@porttion.app',
-          APP_URL: 'https://porttion.app',
-        }),
-      ).not.toThrow();
+      expect(() => validateEnv(validRaw)).not.toThrow();
     });
   });
 });
