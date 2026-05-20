@@ -1,33 +1,107 @@
 {
   "common": {
-    "loading": "Carregando...",
+    "loading": "Carregando…",
     "error": "Algo deu errado.",
-    "retry": "Tentar de novo"
+    "retry": "Tentar de novo",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "continue": "Continuar",
+    "back": "Voltar"
   },
   "errors": {
     "unknown": "Não conseguimos completar a operação. Tente de novo em instantes."
   },
-  "login": {
-    "headline": "Bem-vindo ao seu workspace.",
-    "subtitle": "Entre com a conta do trabalho para continuar.",
-    "tagline": "Kainos · Template",
-    "card": {
+  "landing": {
+    "nav": {
+      "features": "Recursos",
+      "how_it_works": "Como funciona",
+      "use_cases": "Casos de uso",
+      "faq": "FAQ",
+      "login": "Entrar",
+      "open_dashboard": "Acessar dashboard"
+    },
+    "hero": {
+      "eyebrow": "01 ─── ANÁLISE DE ATIVOS COM IA",
+      "headline_before": "Entenda o que está",
+      "headline_emphasis": "acontecendo",
+      "headline_after": "com a sua carteira.",
+      "subcopy": "Acompanhe ativos da B3, ETFs, renda fixa, cripto e moedas em um só lugar. Receba uma leitura clara — em português — sobre tendência, recomendação e justificativa, gerada por um analista de IA treinado em padrões gráficos.",
+      "cta_primary": "Começar grátis",
+      "cta_secondary": "Ver uma carteira de exemplo"
+    }
+  },
+  "auth": {
+    "signup": {
+      "title": "Criar sua conta",
+      "subtitle": "Comece a entender sua carteira em minutos.",
+      "name_label": "Nome",
+      "email_label": "Email",
+      "password_label": "Senha",
+      "password_hint": "Pelo menos 10 caracteres, com letras e números.",
+      "submit": "Criar conta",
+      "already_have_account": "Já tem conta?",
+      "go_to_login": "Entrar",
+      "success_title": "Confirme seu email",
+      "success_body": "Enviamos um link de confirmação para {email}. Clique para ativar sua conta."
+    },
+    "login": {
       "title": "Entrar",
-      "subtitle": "Use o provedor da sua conta corporativa.",
+      "subtitle": "Sua carteira está te esperando.",
+      "email_label": "Email",
+      "password_label": "Senha",
+      "submit": "Entrar",
+      "forgot": "Esqueci minha senha",
+      "or": "ou",
       "google": "Continuar com Google",
       "github": "Continuar com GitHub",
-      "terms": "Termos",
-      "privacy": "Privacidade"
+      "no_account": "Ainda não tem conta?",
+      "go_to_signup": "Criar conta",
+      "tagline": "Porttion · análise com IA"
+    },
+    "verify": {
+      "title": "Confirmando seu email…",
+      "success_title": "Email confirmado.",
+      "success_body": "Sua conta está ativa. Você já pode entrar.",
+      "error_title": "Link inválido ou expirado",
+      "error_body": "Solicite um novo link de confirmação na tela de login.",
+      "go_to_login": "Ir para login"
+    },
+    "forgot": {
+      "title": "Esqueci minha senha",
+      "subtitle": "Digite o email da sua conta e enviamos um link para redefinir a senha.",
+      "email_label": "Email",
+      "submit": "Enviar link",
+      "submitted_title": "Verifique sua caixa de email",
+      "submitted_body": "Se houver uma conta com {email}, você receberá um link em instantes."
+    },
+    "reset": {
+      "title": "Definir nova senha",
+      "password_label": "Nova senha",
+      "password_hint": "Pelo menos 10 caracteres, com letras e números.",
+      "submit": "Salvar nova senha",
+      "success_title": "Senha alterada",
+      "success_body": "Você já pode entrar com a nova senha.",
+      "error_title": "Link inválido ou expirado",
+      "error_body": "Solicite um novo link na tela de esqueci a senha."
+    },
+    "errors": {
+      "Configuration": "Erro de configuração da autenticação.",
+      "AccessDenied": "Acesso negado.",
+      "Verification": "Link inválido ou expirado.",
+      "OAuthAccountNotLinked": "Esse email já está vinculado a outro provedor.",
+      "CredentialsSignin": "Email ou senha inválidos.",
+      "EmailNotVerified": "Confirme seu email antes de entrar. Verifique sua caixa de entrada.",
+      "Default": "Não conseguimos completar o login. Tente de novo."
     }
   },
   "topbar": {
     "theme_toggle": "Alternar tema",
+    "user_menu_label": "Conta",
     "nav": {
       "home": "Início",
       "admin": "Admin",
       "menu_label": "Abrir menu"
     },
-    "user_menu_label": "Conta",
     "menu": {
       "theme": "Tema",
       "theme_light": "Claro",
@@ -36,36 +110,22 @@
       "logout": "Sair"
     }
   },
+  "login": {
+    "headline": "Bem-vindo ao Porttion.",
+    "subtitle": "Entre para acompanhar sua carteira.",
+    "tagline": "Porttion · análise com IA",
+    "card": {
+      "title": "Entrar",
+      "subtitle": "Use o provedor da sua conta.",
+      "google": "Continuar com Google",
+      "github": "Continuar com GitHub",
+      "terms": "Termos",
+      "privacy": "Privacidade"
+    }
+  },
   "home": {
     "title": "Workspace pronto.",
     "subtitle": "Este é o template Kainos: auth, admin, storage, fila e ai-runtime já configurados.",
     "hint": "Adicione suas features em components/features/ e routes em app/(authed)/."
-  },
-  "auth": {
-    "errors": {
-      "Configuration": "Configuração de auth incorreta. Avise o administrador.",
-      "AccessDenied": "Acesso negado pelo provedor.",
-      "Verification": "Falha na verificação. Tente novamente.",
-      "Default": "Não foi possível entrar. Tente de novo em instantes.",
-      "OAuthAccountNotLinked": "Esse e-mail já foi usado com outro provedor."
-    }
-  },
-  "admin": {
-    "hub": {
-      "title": "Área Admin",
-      "subtitle": "Ferramentas operacionais e configuração do sistema",
-      "queues": {
-        "title": "Filas",
-        "description": "Monitore jobs em processamento via Bull Board."
-      },
-      "metrics": {
-        "title": "Métricas",
-        "description": "Dashboard de métricas (em construção neste template)."
-      },
-      "bull": {
-        "title": "Bull Dashboard",
-        "description": "Acesso direto ao monitor de filas BullMQ."
-      }
-    }
   }
 }
