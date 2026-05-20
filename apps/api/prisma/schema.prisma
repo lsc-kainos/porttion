@@ -16,15 +16,18 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  avatar    String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  avatar          String?
+  role            Role      @default(USER)
+  passwordHash    String?
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  llmConfigs LlmConfig[]
+  llmConfigs  LlmConfig[]
+  emailTokens EmailToken[]
 }
 
 // LlmConfig: versionamento genérico de configs LLM.
@@ -46,4 +49,22 @@ model LlmConfig {
 
   @@unique([key, version])
   @@index([key, active])
+}
+
+enum EmailTokenKind {
+  VERIFY
+  RESET
+}
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String
+  kind      EmailTokenKind
+  tokenHash String         @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind])
 }

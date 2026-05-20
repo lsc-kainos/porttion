@@ -10,6 +10,8 @@ describe('UsersController.me', () => {
       name: 'A',
       avatar: null,
       role: Role.USER,
+      passwordHash: null,
+      emailVerifiedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
