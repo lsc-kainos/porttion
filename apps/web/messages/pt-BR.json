@@ -1,0 +1,71 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado.",
+    "retry": "Tentar de novo"
+  },
+  "errors": {
+    "unknown": "Não conseguimos completar a operação. Tente de novo em instantes."
+  },
+  "login": {
+    "headline": "Bem-vindo ao seu workspace.",
+    "subtitle": "Entre com a conta do trabalho para continuar.",
+    "tagline": "Kainos · Template",
+    "card": {
+      "title": "Entrar",
+      "subtitle": "Use o provedor da sua conta corporativa.",
+      "google": "Continuar com Google",
+      "github": "Continuar com GitHub",
+      "terms": "Termos",
+      "privacy": "Privacidade"
+    }
+  },
+  "topbar": {
+    "theme_toggle": "Alternar tema",
+    "nav": {
+      "home": "Início",
+      "admin": "Admin",
+      "menu_label": "Abrir menu"
+    },
+    "user_menu_label": "Conta",
+    "menu": {
+      "theme": "Tema",
+      "theme_light": "Claro",
+      "theme_dark": "Escuro",
+      "theme_system": "Sistema",
+      "logout": "Sair"
+    }
+  },
+  "home": {
+    "title": "Workspace pronto.",
+    "subtitle": "Este é o template Kainos: auth, admin, storage, fila e ai-runtime já configurados.",
+    "hint": "Adicione suas features em components/features/ e routes em app/(authed)/."
+  },
+  "auth": {
+    "errors": {
+      "Configuration": "Configuração de auth incorreta. Avise o administrador.",
+      "AccessDenied": "Acesso negado pelo provedor.",
+      "Verification": "Falha na verificação. Tente novamente.",
+      "Default": "Não foi possível entrar. Tente de novo em instantes.",
+      "OAuthAccountNotLinked": "Esse e-mail já foi usado com outro provedor."
+    }
+  },
+  "admin": {
+    "hub": {
+      "title": "Área Admin",
+      "subtitle": "Ferramentas operacionais e configuração do sistema",
+      "queues": {
+        "title": "Filas",
+        "description": "Monitore jobs em processamento via Bull Board."
+      },
+      "metrics": {
+        "title": "Métricas",
+        "description": "Dashboard de métricas (em construção neste template)."
+      },
+      "bull": {
+        "title": "Bull Dashboard",
+        "description": "Acesso direto ao monitor de filas BullMQ."
+      }
+    }
+  }
+}
