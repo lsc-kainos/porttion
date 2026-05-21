@@ -55,20 +55,30 @@ export class CredentialsService {
         passwordHash,
       },
     });
-    const token = await this.tokens.issue({
-      userId: user.id,
-      kind: 'VERIFY',
-      ttlMinutes: VERIFY_TTL_MIN,
-    });
-    const appUrl = this.cfg.getOrThrow<string>('APP_URL');
-    await this.email.send({
-      to: user.email,
-      subject: 'Confirme seu email no Porttion',
-      html: verifyEmailHtml({
-        name: user.name,
-        verifyUrl: `${appUrl}/verify-email/${token}`,
-      }),
-    });
+    // Se o envio do email falhar, removemos o user recém-criado para
+    // não deixar conta órfã sem verificação. Cascade no EmailToken faz
+    // o cleanup do token automaticamente.
+    try {
+      const token = await this.tokens.issue({
+        userId: user.id,
+        kind: 'VERIFY',
+        ttlMinutes: VERIFY_TTL_MIN,
+      });
+      const appUrl = this.cfg.getOrThrow<string>('APP_URL');
+      await this.email.send({
+        to: user.email,
+        subject: 'Confirme seu email no Porttion',
+        html: verifyEmailHtml({
+          name: user.name,
+          verifyUrl: `${appUrl}/verify-email/${token}`,
+        }),
+      });
+    } catch (err) {
+      await this.prisma.user
+        .delete({ where: { id: user.id } })
+        .catch(() => undefined);
+      throw err;
+    }
   }
 
   async validate(input: ValidateInput): Promise<ValidatedUser> {

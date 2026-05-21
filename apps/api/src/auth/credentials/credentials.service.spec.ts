@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 
 describe('CredentialsService', () => {
   const prisma = {
-    user: { findUnique: jest.fn(), create: jest.fn() },
+    user: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn() },
   } as unknown as PrismaService;
   const email = { send: jest.fn() } as unknown as EmailService;
   const tokens = { issue: jest.fn() } as unknown as EmailTokenService;
@@ -63,6 +63,46 @@ describe('CredentialsService', () => {
       await expect(
         service.signup({ email: 'a@b.com', name: 'A', password: 'senha12345' }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('faz rollback do user se o envio do email falhar', async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.create as jest.Mock).mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        name: 'A',
+      });
+      (tokens.issue as jest.Mock).mockResolvedValue('rawtoken');
+      (email.send as jest.Mock).mockRejectedValue(
+        new Error('Email send failed: domain not verified'),
+      );
+      (prisma.user.delete as jest.Mock).mockResolvedValue({});
+
+      await expect(
+        service.signup({ email: 'a@b.com', name: 'A', password: 'senha12345' }),
+      ).rejects.toThrow(/Email send failed/);
+
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
+    });
+
+    it('faz rollback do user se a emissão do token falhar', async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.create as jest.Mock).mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        name: 'A',
+      });
+      (tokens.issue as jest.Mock).mockRejectedValue(
+        new Error('DB unavailable'),
+      );
+      (prisma.user.delete as jest.Mock).mockResolvedValue({});
+
+      await expect(
+        service.signup({ email: 'a@b.com', name: 'A', password: 'senha12345' }),
+      ).rejects.toThrow(/DB unavailable/);
+
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
+      expect(email.send).not.toHaveBeenCalled();
     });
   });
 
