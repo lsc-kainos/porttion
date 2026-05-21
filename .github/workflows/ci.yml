@@ -132,6 +132,9 @@ jobs:
           RESEND_API_KEY: re_test_key
           EMAIL_FROM: e2e@porttion.test
           APP_URL: http://localhost:3000
+          NEXTAUTH_URL: http://localhost:3000
+          GOOGLE_CLIENT_ID: e2e-google-client-id
+          GOOGLE_CLIENT_SECRET: e2e-google-client-secret
         run: cd apps/web && npx playwright test
       - name: Upload playwright report on failure
         if: failure()
