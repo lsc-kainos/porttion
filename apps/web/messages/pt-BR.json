@@ -15,22 +15,123 @@
     "unknown": "Não conseguimos completar a operação. Tente de novo em instantes."
   },
   "landing": {
-    "nav": {
-      "features": "Recursos",
-      "how_it_works": "Como funciona",
-      "use_cases": "Casos de uso",
-      "faq": "FAQ",
+    "header": {
+      "nav": { "value": "Valor", "how": "Como funciona", "ai": "IA", "faq": "FAQ" },
       "login": "Entrar",
-      "open_dashboard": "Acessar dashboard"
+      "signup": "Criar conta"
     },
     "hero": {
-      "eyebrow": "01 ─── ANÁLISE DE ATIVOS COM IA",
-      "headline_before": "Entenda o que está",
-      "headline_emphasis": "acontecendo",
-      "headline_after": "com a sua carteira.",
-      "subcopy": "Acompanhe ativos da B3, ETFs, renda fixa, cripto e moedas em um só lugar. Receba uma leitura clara — em português — sobre tendência, recomendação e justificativa, gerada por um analista de IA treinado em padrões gráficos.",
-      "cta_primary": "Começar grátis",
-      "cta_secondary": "Ver uma carteira de exemplo"
+      "headline": "<italic>Acompanhe</italic> seus ativos sem prometer milagre.",
+      "subhead": "Porttion é um diário inteligente de carteira. Você lança suas posições, a gente cuida das contas — e a IA fala só do que vê nos candles.",
+      "cta": { "primary": "Criar conta grátis", "secondary": "Já tenho conta" }
+    },
+    "value": {
+      "eyebrow": "Por quê",
+      "title": "Decisões com base, não com fé",
+      "subtitle": "Três decisões editoriais que diferenciam o Porttion.",
+      "items": {
+        "privacy": {
+          "title": "Privacidade primeiro",
+          "body": "Seus dados ficam no seu workspace. Sem ad-tech, sem revenda."
+        },
+        "noPromises": {
+          "title": "Sem promessa de retorno",
+          "body": "A IA nunca diz preço-alvo nem garante lucro. Disclaimer em todo card."
+        },
+        "tech": {
+          "title": "Análise técnica, só técnica",
+          "body": "Padrões clássicos derivados das velas — engolfo, doji, suporte, MM21."
+        }
+      }
+    },
+    "how": {
+      "eyebrow": "Como funciona",
+      "title": "Quatro passos, sem ritual",
+      "steps": {
+        "wallet": { "title": "Crie sua carteira", "body": "Defina nome, moeda base e estratégia." },
+        "positions": {
+          "title": "Adicione posições",
+          "body": "Busca de ticker integrada — Yahoo é a fonte."
+        },
+        "kpis": {
+          "title": "Veja os KPIs",
+          "body": "Patrimônio, P&L e variação do dia — calculados no servidor."
+        },
+        "ai": {
+          "title": "Analise com IA",
+          "body": "7 dias de candles viram um cartão técnico em pt-BR."
+        }
+      }
+    },
+    "ai": {
+      "eyebrow": "IA",
+      "title": "Um analista técnico no seu bolso",
+      "subtitle": "Versionado, com disclaimer e sem prompt injection — o que se espera de IA séria."
+    },
+    "useCases": {
+      "eyebrow": "Para quem",
+      "title": "Três cenários comuns",
+      "items": {
+        "beginner": {
+          "title": "Comecei agora",
+          "quote": "Não sei ler gráfico ainda — o card de IA me dá um vocabulário pra começar."
+        },
+        "intermediate": {
+          "title": "Já uso planilha",
+          "quote": "Tenho meu Excel, mas perco tempo atualizando cotação. Aqui é automático."
+        },
+        "multi": {
+          "title": "Várias carteiras",
+          "quote": "Separar Cripto, Renda Fixa e Ações em carteiras distintas resolve meu caos."
+        }
+      }
+    },
+    "testimonials": {
+      "placeholder": true,
+      "eyebrow": "O que dizem",
+      "title": "Depoimentos",
+      "items": {
+        "one": { "quote": "O Porttion virou minha primeira aba toda manhã.", "author": "—" },
+        "two": {
+          "quote": "Finalmente uma ferramenta que não tenta me vender o próximo BBAS3.",
+          "author": "—"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Perguntas honestas",
+      "items": {
+        "data": {
+          "q": "Como vocês usam meus dados?",
+          "a": "Ficam no seu workspace. Sem revenda, sem ad-tech, sem treino de modelo com seus dados."
+        },
+        "recommend": {
+          "q": "Vocês recomendam compra?",
+          "a": "Não. A IA só descreve o que está nas velas, com disclaimer obrigatório."
+        },
+        "import": {
+          "q": "Posso importar CSV ou nota de corretora?",
+          "a": "Vem na próxima fase (F6). Por enquanto, cadastro manual."
+        },
+        "pricing": {
+          "q": "Tem versão paga?",
+          "a": "Hoje é grátis no MVP. Eventual plano pago não vai cobrar pelo básico."
+        },
+        "language": {
+          "q": "Em outras línguas?",
+          "a": "pt-BR primeiro. en-US chega antes do plano comercial."
+        }
+      }
+    },
+    "closing": {
+      "title": "Comece agora.",
+      "subhead": "Leva 30 segundos pra criar a conta. Você decide o que faz da próxima vez que abrir.",
+      "cta": { "primary": "Criar conta grátis", "secondary": "Entrar" }
+    },
+    "footer": {
+      "copy": "© 2026 Porttion · feito pela Kainos Labs",
+      "links": { "terms": "Termos", "privacy": "Privacidade", "github": "GitHub" }
     }
   },
   "auth": {
@@ -335,6 +436,37 @@
       "title": "Watchlist",
       "headline": "Em breve",
       "body": "Acompanhamento de ativos fora da carteira chega na F2."
+    }
+  },
+  "settings": {
+    "account": {
+      "eyebrow": "Conta",
+      "title": "Sua identidade",
+      "signOut": "Sair"
+    },
+    "locale": {
+      "eyebrow": "Idioma e fuso",
+      "title": "Preferências regionais",
+      "language": "Idioma",
+      "timezone": "Fuso horário",
+      "note": "Suporte a en-US e fuso configurável chegam em fase futura. Por enquanto, pt-BR e America/Sao_Paulo são fixos."
+    }
+  },
+  "error": {
+    "404": {
+      "eyebrow": "404",
+      "title": "Página não encontrada",
+      "body": "O caminho que você abriu não existe (ou ainda não).",
+      "home": "Início",
+      "dashboard": "Dashboard"
+    },
+    "500": {
+      "eyebrow": "Erro",
+      "title": "Algo deu errado por aqui",
+      "body": "A culpa não é sua. Recarregue a página ou volte mais tarde.",
+      "retry": "Tentar de novo",
+      "home": "Início",
+      "dashboard": "Dashboard"
     }
   },
   "admin": {
