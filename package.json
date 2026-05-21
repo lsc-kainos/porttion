@@ -26,6 +26,7 @@
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "db:setup": "bash scripts/db-setup.sh",
+    "db:reset": "npm --workspace=@kainos/api exec -- prisma migrate reset --force --skip-seed",
     "db:studio": "npm --workspace=@kainos/api exec -- prisma studio"
   },
   "lint-staged": {
