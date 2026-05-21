@@ -1,0 +1,12 @@
+{
+  "PETR4": {
+    "tendencia": "lateral",
+    "recomendacao": "manter",
+    "confianca": 62,
+    "padroes": ["Suporte testado em 32.0", "Topo recente em 34.5", "MM21 plana"],
+    "riscos": ["Volatilidade aumentando", "Volume abaixo da média de 30d"],
+    "sugestao": "Aguarde rompimento da máxima recente antes de aumentar posição.",
+    "justificativa": "A vela mais recente confirma o respeito ao suporte de 32.0 testado três vezes na janela. MM21 plana sugere indecisão; sem volume confirmando rompimento.",
+    "horizonte": "1-2 semanas"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "thresholds": {
+    "src/wallets/**": { "statements": 70 },
+    "src/positions/**": { "statements": 70 },
+    "src/market/**": { "statements": 70 },
+    "src/ai-analyst/**": { "statements": 70 },
+    "src/auth/guards/**": { "statements": 100 },
+    "src/wallets/wallets.service.ts": { "statements": 100 }
+  }
+}
