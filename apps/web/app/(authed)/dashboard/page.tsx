@@ -13,22 +13,11 @@ import { WatchlistPlaceholder } from '@/components/organisms/wallet/watchlist-pl
 import { WalletEmptyState } from '@/components/organisms/wallet/wallet-empty-state';
 import { CreateWalletDialog } from '@/components/organisms/wallet/create-wallet-dialog';
 
-/** Check if this is the first time the user sees the empty-state, using sessionStorage as gate. */
-function shouldAutoOpenCreateDialog(): boolean {
-  if (typeof window === 'undefined') return false;
-  const SEEN = 'porttion_first_wallet_dialog';
-  if (sessionStorage.getItem(SEEN)) return false;
-  sessionStorage.setItem(SEEN, '1');
-  return true;
-}
-
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
   const { activeWallet, wallets } = useWalletSwitcher();
   const { data, isLoading } = useWalletDetail(activeWallet?.id ?? null);
-  const [createOpen, setCreateOpen] = useState(() =>
-    wallets.length === 0 ? shouldAutoOpenCreateDialog() : false,
-  );
+  const [createOpen, setCreateOpen] = useState(false);
 
   if (wallets.length === 0) {
     return (

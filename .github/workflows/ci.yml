@@ -117,7 +117,7 @@ jobs:
         run: |
           cd apps/api && npx prisma migrate deploy && npx prisma db seed
       - name: Install Playwright browsers
-        run: cd apps/web && npx playwright install --with-deps chromium
+        run: cd apps/web && npx playwright install --with-deps chromium webkit
       - name: Run e2e (desktop + iPhone 13)
         env:
           NODE_ENV: test

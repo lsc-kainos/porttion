@@ -8,18 +8,17 @@ export async function setupTestUser(): Promise<{ email: string; password: string
   const prisma = new PrismaClient();
   try {
     const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10);
-    await prisma.user.upsert({
-      where: { email: TEST_EMAIL },
-      create: {
+    // Destructive: deleteMany cascades into wallets/positions/etc. Without this,
+    // a previous test run that failed before afterAll could leave a wallet
+    // behind, breaking the empty-state assertion at the start of the slice.
+    await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
+    await prisma.user.create({
+      data: {
         email: TEST_EMAIL,
         name: 'E2E User',
         passwordHash,
         emailVerifiedAt: new Date(),
         role: 'USER',
-      },
-      update: {
-        passwordHash,
-        emailVerifiedAt: new Date(),
       },
     });
     return { email: TEST_EMAIL, password: TEST_PASSWORD };

@@ -23,10 +23,7 @@ export function LandingHeader() {
       data-scrolled={scrolled ? 'true' : 'false'}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Logo />
-          <span className="font-semibold">Porttion</span>
-        </Link>
+        <Logo />
         <nav className="ml-auto hidden items-center gap-1 md:flex">
           <a
             href="#valor"
