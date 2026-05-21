@@ -119,12 +119,15 @@ test.describe('F1b — vertical slice', () => {
     await page.getByRole('button', { name: /^adicionar$/i }).click();
 
     // 5. dashboard mostra KPIs
+    // "Patrimônio" também aparece em "Evolução do patrimônio" (placeholder) —
+    // usamos exact:true pra casar só o label do KPI card.
     await page.goto('/dashboard');
-    await expect(page.getByText('Patrimônio')).toBeVisible();
+    await expect(page.getByText('Patrimônio', { exact: true })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/R\$\s*3\.250,00/)).toBeVisible();
 
     // 6. asset detail — click on position PETR4
-    await page.getByText('PETR4').first().click();
+    // O ticker aparece em vários lugares (badge, tabela/card); pegar o link da row.
+    await page.getByRole('link', { name: /PETR4/i }).first().click();
     await expect(page).toHaveURL(/\/ativos\/PETR4/);
     await expect(page.getByRole('img', { name: /candles/i })).toBeVisible();
 
