@@ -97,7 +97,13 @@ test.describe('F1b — vertical slice', () => {
       .first()
       .click();
     await page.getByLabel(/nome/i).fill('Principal');
+    // Wait for the POST to finish before navigating away — sem isso, o
+    // page.goto subsequente aborta a request em mobile (timing mais lento).
+    const createResp = page.waitForResponse(
+      (r) => r.url().endsWith('/api/v1/wallets') && r.request().method() === 'POST',
+    );
     await page.getByRole('button', { name: /^criar$/i }).click();
+    await createResp;
 
     // 4. navigate to carteira detail to add position
     // After wallet creation the dashboard re-renders; navigate to /carteiras to find it.
@@ -116,14 +122,19 @@ test.describe('F1b — vertical slice', () => {
     await page.getByText('PETR4').first().click();
     await page.getByLabel(/quantidade/i).fill('100');
     await page.getByLabel(/preço/i).fill('30');
+    const addPositionResp = page.waitForResponse(
+      (r) => r.url().includes('/positions') && r.request().method() === 'POST',
+    );
     await page.getByRole('button', { name: /^adicionar$/i }).click();
+    await addPositionResp;
 
     // 5. dashboard mostra KPIs
     // "Patrimônio" também aparece em "Evolução do patrimônio" (placeholder) —
-    // usamos exact:true pra casar só o label do KPI card.
+    // usamos exact:true pra casar só o label do KPI card. Não checamos o valor
+    // exato em R$ porque o backend chama Yahoo direto (não há fixture na API);
+    // basta confirmar que o KPI renderizou.
     await page.goto('/dashboard');
     await expect(page.getByText('Patrimônio', { exact: true })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/R\$\s*3\.250,00/)).toBeVisible();
 
     // 6. asset detail — click on position PETR4
     // O ticker aparece em vários lugares (badge, tabela/card); pegar o link da row.
