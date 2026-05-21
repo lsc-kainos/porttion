@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ASSET_ANALYSIS_V1 } from '../src/ai-analyst/prompts/asset-analysis-v1';
+import { ASSET_ANALYSIS_V1 } from './prompts/asset-analysis-v1';
 
 const prisma = new PrismaClient();
 
