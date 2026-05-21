@@ -1,6 +1,5 @@
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import type { Role } from '@kainos/shared-types';
 import { internalFetch } from './internal-api';
@@ -42,9 +41,9 @@ export async function jwtCallback({ token, user, trigger }: JwtArgs) {
   });
 
   // Falha aqui é fatal: se não substituirmos token.sub pelo CUID do User,
-  // o NextAuth assina o JWT com o sub do provedor OAuth (Google/GitHub) e
-  // a API rejeita TODAS as requests com 401 (user não existe pelo id do
-  // OAuth). Melhor abortar o login do que entregar token-fantasma.
+  // o NextAuth assina o JWT com o sub do provedor OAuth (Google) e a API
+  // rejeita TODAS as requests com 401 (user não existe pelo id do OAuth).
+  // Melhor abortar o login do que entregar token-fantasma.
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     console.error('[auth] user sync failed', {
@@ -80,10 +79,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-    GitHubProvider({
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
     CredentialsProvider({
       id: 'credentials',

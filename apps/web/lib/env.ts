@@ -7,8 +7,6 @@ const schema = z.object({
   NEXTAUTH_SECRET: z.string().min(32),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
-  GITHUB_CLIENT_ID: z.string().min(1),
-  GITHUB_CLIENT_SECRET: z.string().min(1),
   INTERNAL_SERVICE_TOKEN: z.string().min(32),
 });
 
@@ -30,8 +28,6 @@ function load(): Env {
       NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? '',
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? '',
       GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? '',
-      GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID ?? '',
-      GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET ?? '',
       INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN ?? '',
     } as Env;
     return cached;
@@ -43,8 +39,6 @@ function load(): Env {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
   });
   return cached;

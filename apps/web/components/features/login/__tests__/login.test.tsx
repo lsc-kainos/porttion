@@ -27,16 +27,13 @@ describe('<Login />', () => {
     );
   }
 
-  it('renderiza título, subtítulo, campos de email/senha e botões OAuth', () => {
+  it('renderiza título, subtítulo, campos de email/senha e botão OAuth', () => {
     setup();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(messages.auth.login.title);
     expect(screen.getByLabelText(messages.auth.login.email_label)).toBeInTheDocument();
     expect(screen.getByLabelText(messages.auth.login.password_label)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: new RegExp(messages.auth.login.google, 'i') }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: new RegExp(messages.auth.login.github, 'i') }),
     ).toBeInTheDocument();
   });
 
@@ -80,17 +77,12 @@ describe('<Login />', () => {
     );
   });
 
-  it('botões OAuth chamam signIn com o provider correto e callbackUrl=/dashboard', () => {
+  it('botão Google chama signIn com o provider correto e callbackUrl=/dashboard', () => {
     setup();
     fireEvent.click(
       screen.getByRole('button', { name: new RegExp(messages.auth.login.google, 'i') }),
     );
     expect(signIn).toHaveBeenCalledWith('google', { callbackUrl: '/dashboard' });
-
-    fireEvent.click(
-      screen.getByRole('button', { name: new RegExp(messages.auth.login.github, 'i') }),
-    );
-    expect(signIn).toHaveBeenCalledWith('github', { callbackUrl: '/dashboard' });
   });
 
   it('exibe erro do query param quando presente', () => {

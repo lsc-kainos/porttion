@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/layout/logo';
 import { GoogleLogo } from './google-logo';
-import { GithubLogo } from './github-logo';
 
 const ERROR_KEYS = [
   'Configuration',
@@ -101,14 +100,9 @@ export function Login() {
         <span className="h-px flex-1 bg-[var(--border)]" />
       </div>
 
-      <div className="flex flex-col gap-3">
-        <Button variant="outline" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
-          <GoogleLogo /> {t('google')}
-        </Button>
-        <Button variant="outline" onClick={() => signIn('github', { callbackUrl: '/dashboard' })}>
-          <GithubLogo /> {t('github')}
-        </Button>
-      </div>
+      <Button variant="outline" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
+        <GoogleLogo /> {t('google')}
+      </Button>
 
       <p className="text-muted-foreground text-sm">
         {t('no_account')}{' '}
