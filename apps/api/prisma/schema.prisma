@@ -28,6 +28,8 @@ model User {
 
   llmConfigs  LlmConfig[]
   emailTokens EmailToken[]
+  wallets     Wallet[]
+  analyses    AssetAnalysis[]
 }
 
 // LlmConfig: versionamento genérico de configs LLM.
@@ -67,4 +69,48 @@ model EmailToken {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, kind])
+}
+
+model Wallet {
+  id           String     @id @default(cuid())
+  userId       String
+  name         String
+  baseCurrency String     @default("BRL")
+  strategy     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  positions    Position[]
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model Position {
+  id         String   @id @default(cuid())
+  walletId   String
+  ticker     String
+  qty        Float
+  avgPrice   Float
+  assetClass String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@unique([walletId, ticker])
+  @@index([walletId])
+}
+
+model AssetAnalysis {
+  id            String   @id @default(cuid())
+  userId        String
+  ticker        String
+  windowDays    Int
+  payload       Json
+  promptKey     String
+  promptVersion Int
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, ticker, createdAt])
 }

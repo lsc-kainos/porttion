@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import messages from '@/messages/pt-BR.json';
 import { WalletSwitcher } from '../wallet-switcher';
 import { WalletSwitcherProvider } from '@/components/providers/wallet-switcher-provider';
-import type { WalletSummary } from '@/types/wallet';
+import type { WalletSummary } from '@kainos/shared-types';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 

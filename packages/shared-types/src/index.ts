@@ -36,3 +36,5 @@ export interface PaginatedResponse<T> {
   nextCursor: string | null;
   total?: number;
 }
+
+export * from './porttion.js';

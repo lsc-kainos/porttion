@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { AuthedShell } from '@/components/templates/authed-shell';
 import { WalletSwitcherProvider } from '@/components/providers/wallet-switcher-provider';
 import { apiFetch } from '@/lib/api';
-import type { WalletSummary } from '@/types/wallet';
+import type { WalletSummary } from '@kainos/shared-types';
 
 async function fetchWallets(): Promise<WalletSummary[]> {
   // Até o Commit 3 esse endpoint não existe — defensive guard:

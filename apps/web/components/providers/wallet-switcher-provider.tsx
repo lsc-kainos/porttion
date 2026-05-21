@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { WalletSummary } from '@/types/wallet';
+import type { WalletSummary } from '@kainos/shared-types';
 import { useWalletsList } from '@/hooks/shared/use-wallets-list';
 
 interface Ctx {
