@@ -146,3 +146,36 @@ Para rodar **um único teste**:
 - Multi-região
 
 Se um produto derivado precisa de algo dessa lista, considere implementar **no template** (PR de volta) em vez de duplicar em cada produto.
+
+## Fluxo de entrega
+
+Toda implementação termina em PR contra a branch `staging` (não direto pra `main`).
+
+### Branches e ambientes
+
+- `main` — produção. Sempre deployable. Deploy automático no Railway (env de produção).
+- `staging` — pré-produção. Alvo de todos os PRs de feature. Deploy automático no Railway (env de staging).
+- `feat/*`, `fix/*`, `chore/*`, `refactor/*` — branches de trabalho, deletadas após merge.
+
+### Requisitos para merge em staging
+
+1. **CI verde obrigatório:** lint + typecheck + test (Jest+Vitest) + build + e2e (Playwright em mobile e desktop) + `scripts/i18n-check.ts` precisam passar.
+   - Nenhum job pode estar `skipped` exceto por path filter justificado (ex.: docs-only).
+   - `--no-verify` em hooks é proibido sem aprovação explícita.
+2. **Revisão obrigatória** com classificação por severidade:
+   - **P0** — bloqueador (bug, regressão, falha de segurança, contrato quebrado, falha de critério de aceitação). **Precisa ser resolvido antes do merge.**
+   - **P1** — importante mas não bloqueia (refactor sugerido, melhoria de UX/perf). Vira issue ou commit follow-up; **não bloqueia merge**.
+   - **P2** — nice-to-have / opinião / nit. Resolução opcional.
+3. **Squash and merge** apenas. Mensagem final = título do PR (conventional commit).
+
+### Promoção staging → main
+
+Promoção é manual e periódica (não automática). Após smoke test em staging do fluxo coberto pela fase, abre-se um PR `staging → main` com o release notes. Mesmo gate de CI verde se aplica.
+
+## Convenção de i18n
+
+- Toda string visível ao usuário vai por `t('key')` com namespace `<feature>.<scope>.<key>`.
+- Sem concatenação de string em código; frases compostas usam ICU MessageFormat (`{name}`, `{n, plural, ...}`).
+- Datas/números via `useFormatter` de `next-intl`, nunca `toLocaleString` solto.
+- Validado em CI por `scripts/i18n-check.ts` (em `apps/web/scripts/`). Chave usada sem definição = PR vermelho.
+- Strings que **não** vão para i18n: símbolos de moeda (`R$`), tickers (`PETR4`), labels técnicos em mono (`gpt-4o-mini`, versão de prompt).

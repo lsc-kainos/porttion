@@ -1,6 +1,5 @@
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import type { Role } from '@kainos/shared-types';
 import { internalFetch } from './internal-api';
@@ -42,9 +41,9 @@ export async function jwtCallback({ token, user, trigger }: JwtArgs) {
   });
 
   // Falha aqui é fatal: se não substituirmos token.sub pelo CUID do User,
-  // o NextAuth assina o JWT com o sub do provedor OAuth (Google/GitHub) e
-  // a API rejeita TODAS as requests com 401 (user não existe pelo id do
-  // OAuth). Melhor abortar o login do que entregar token-fantasma.
+  // o NextAuth assina o JWT com o sub do provedor OAuth (Google) e a API
+  // rejeita TODAS as requests com 401 (user não existe pelo id do OAuth).
+  // Melhor abortar o login do que entregar token-fantasma.
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     console.error('[auth] user sync failed', {
@@ -81,9 +80,37 @@ export const authOptions: NextAuthOptions = {
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
-    GitHubProvider({
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
+    CredentialsProvider({
+      id: 'credentials',
+      name: 'Credenciais',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Senha', type: 'password' },
+      },
+      authorize: async (creds) => {
+        if (!creds?.email || !creds?.password) return null;
+        const res = await internalFetch('/api/v1/internal/auth/validate', {
+          method: 'POST',
+          body: JSON.stringify({ email: creds.email, password: creds.password }),
+        });
+        if (!res.ok) {
+          if (res.status === 401) {
+            const body = (await res.json().catch(() => ({}))) as { message?: string };
+            if (body.message?.toLowerCase().includes('não verificado')) {
+              throw new Error('EmailNotVerified');
+            }
+            throw new Error('CredentialsSignin');
+          }
+          throw new Error('Default');
+        }
+        const user = (await res.json()) as {
+          id: string;
+          email: string;
+          name: string | null;
+          avatar: string | null;
+        };
+        return { id: user.id, email: user.email, name: user.name, image: user.avatar };
+      },
     }),
     // E2E_TEST=1 ativa o provider de credenciais usado pelos testes
     // Playwright. NODE_ENV sozinho não basta porque `next dev` força

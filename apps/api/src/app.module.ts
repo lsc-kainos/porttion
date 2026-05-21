@@ -13,6 +13,9 @@ import { QueueModule } from './queue/queue.module';
 import { BullBoardAdminModule } from './queue/bull-board.module';
 import { MetricsModule } from './admin/metrics/metrics.module';
 import { AiRuntimeModule } from './ai-runtime/ai-runtime.module';
+import { EmailModule } from './email/email.module';
+import { CredentialsModule } from './auth/credentials/credentials.module';
+import { EmailVerificationModule } from './auth/email-verification/email-verification.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { UserScopedThrottlerGuard } from './auth/guards/user-scoped-throttler.guard';
@@ -34,10 +37,14 @@ import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
       // Limites generosos: propósito é cortar abuso de API, não constranger
       // uso real. Ajuste por feature conforme adicionar buckets.
       { name: 'default', ttl: 60_000, limit: 600 },
+      { name: 'auth-email', ttl: 15 * 60_000, limit: 5 },
     ]),
     PrismaModule,
     HealthModule,
     AuthModule,
+    EmailModule,
+    CredentialsModule,
+    EmailVerificationModule,
     UsersModule,
     StorageModule,
     QueueModule,

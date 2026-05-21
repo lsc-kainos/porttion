@@ -23,8 +23,23 @@ function isRateLimited(pathname: string): boolean {
 
 const SENSITIVE_AUTH_LIMIT = 10;
 
+// Paths that are public and must bypass the auth middleware.
+const PUBLIC_PATHS = ['/', '/signup', '/forgot-password'];
+
+// Dynamic public path prefixes (e.g. /verify-email/<token>, /reset-password/<token>).
+const PUBLIC_PREFIXES = ['/verify-email/', '/reset-password/'];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Public pages (landing, signup, forgot-password, verify-email, reset-password) need no auth check.
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith('/api/auth/')) {
     if (rateLimitEnabled() && isRateLimited(pathname)) {

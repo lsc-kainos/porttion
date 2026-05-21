@@ -1,21 +1,22 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getCsrfToken } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import messages from '@/messages/pt-BR.json';
 import { Login } from '../login';
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(''),
+  useRouter: () => ({ replace: vi.fn() }),
 }));
 vi.mock('next-auth/react', () => ({
-  getCsrfToken: vi.fn(async () => 'csrf-stub'),
+  signIn: vi.fn(async () => ({ ok: true, error: null })),
 }));
 
 describe('<Login />', () => {
   beforeEach(() => {
-    (getCsrfToken as ReturnType<typeof vi.fn>).mockReset();
-    (getCsrfToken as ReturnType<typeof vi.fn>).mockResolvedValue('csrf-stub');
+    (signIn as ReturnType<typeof vi.fn>).mockReset();
+    (signIn as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true, error: null });
   });
 
   function setup() {
@@ -26,79 +27,70 @@ describe('<Login />', () => {
     );
   }
 
-  it('renderiza headline (desktop hero + mobile mini-hero), subtítulo e botões OAuth', () => {
+  it('renderiza título, subtítulo, campos de email/senha e botão OAuth', () => {
     setup();
-    expect(screen.getAllByText(messages.login.headline)).toHaveLength(2);
-    expect(screen.getAllByText(messages.login.subtitle)).toHaveLength(2);
-    expect(screen.getByRole('button', { name: /Continuar com Google/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Continuar com GitHub/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(messages.auth.login.title);
+    expect(screen.getByLabelText(messages.auth.login.email_label)).toBeInTheDocument();
+    expect(screen.getByLabelText(messages.auth.login.password_label)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: new RegExp(messages.auth.login.google, 'i') }),
+    ).toBeInTheDocument();
   });
 
-  it('cada botão está dentro de form POST pra /api/auth/signin/{provider}', () => {
+  it('botão submit chama signIn credentials com email e senha', async () => {
     const { container } = setup();
-    const forms = container.querySelectorAll('form');
-    expect(forms).toHaveLength(2);
-    const actions = Array.from(forms).map((f) => f.getAttribute('action'));
-    expect(actions).toContain('/api/auth/signin/google');
-    expect(actions).toContain('/api/auth/signin/github');
-    for (const f of Array.from(forms)) {
-      expect(f.getAttribute('method')?.toUpperCase()).toBe('POST');
-    }
-  });
-
-  it('forms têm hidden inputs csrfToken e callbackUrl=/', () => {
-    const { container } = setup();
-    const forms = container.querySelectorAll('form');
-    for (const f of Array.from(forms)) {
-      const callback = f.querySelector('input[name="callbackUrl"]') as HTMLInputElement;
-      const csrf = f.querySelector('input[name="csrfToken"]') as HTMLInputElement;
-      expect(callback?.value).toBe('/');
-      // csrf é populado por useEffect; pode estar vazio na 1ª render
-      expect(csrf).toBeInTheDocument();
-    }
-  });
-
-  it('botões são type=submit (não onClick — evita lock fantasma)', () => {
-    setup();
-    const google = screen.getByRole('button', { name: /Continuar com Google/i });
-    const github = screen.getByRole('button', { name: /Continuar com GitHub/i });
-    expect(google.getAttribute('type')).toBe('submit');
-    expect(github.getAttribute('type')).toBe('submit');
-  });
-
-  it('1º clique antes do csrf carregar busca token e re-submete (sem refresh)', async () => {
-    // Suspende getCsrfToken pra simular csrf NÃO carregado no mount
-    let resolveCsrf: ((v: string) => void) | undefined;
-    (getCsrfToken as ReturnType<typeof vi.fn>).mockImplementationOnce(
-      () => new Promise<string>((r) => (resolveCsrf = r)),
+    const emailInput = screen.getByLabelText(messages.auth.login.email_label);
+    const passwordInput = screen.getByLabelText(messages.auth.login.password_label);
+    fireEvent.change(emailInput, { target: { value: 'user@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'secret1234' } });
+    fireEvent.submit(container.querySelector('form')!);
+    await waitFor(() =>
+      expect(signIn).toHaveBeenCalledWith('credentials', {
+        email: 'user@example.com',
+        password: 'secret1234',
+        redirect: false,
+      }),
     );
-    const { container } = setup();
-
-    // Click no botão Google ANTES de csrf resolver
-    const googleForm = container.querySelector(
-      'form[action="/api/auth/signin/google"]',
-    ) as HTMLFormElement;
-    const submitSpy = vi.spyOn(googleForm, 'submit').mockImplementation(() => {});
-
-    // Próximo getCsrfToken (do onSubmit handler) retorna fast
-    (getCsrfToken as ReturnType<typeof vi.fn>).mockResolvedValueOnce('fresh-csrf');
-    fireEvent.submit(googleForm);
-
-    await waitFor(() => expect(submitSpy).toHaveBeenCalled());
-
-    // Hidden input foi populado com o token recém-fetched
-    const csrfInput = googleForm.querySelector('input[name="csrfToken"]') as HTMLInputElement;
-    expect(csrfInput.value).toBe('fresh-csrf');
-
-    // Cleanup pro outro teste
-    resolveCsrf?.('csrf-stub');
   });
 
-  it('não renderiza pontos removidos (request_access, features-row, meta-rail)', () => {
+  it('exibe erro CredentialsSignin quando signIn retorna error', async () => {
+    (signIn as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      error: 'CredentialsSignin',
+    });
+    const { container } = setup();
+    fireEvent.submit(container.querySelector('form')!);
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(messages.auth.errors.CredentialsSignin),
+    );
+  });
+
+  it('exibe erro EmailNotVerified quando signIn retorna esse erro', async () => {
+    (signIn as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      error: 'EmailNotVerified',
+    });
+    const { container } = setup();
+    fireEvent.submit(container.querySelector('form')!);
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(messages.auth.errors.EmailNotVerified),
+    );
+  });
+
+  it('botão Google chama signIn com o provider correto e callbackUrl=/dashboard', () => {
     setup();
-    expect(screen.queryByText(/Solicitar acesso/i)).toBeNull();
-    expect(screen.queryByText('NF-e modelo 55')).toBeNull();
-    expect(screen.queryByText('Boletos')).toBeNull();
-    expect(screen.queryByText(/Sistema operacional/i)).toBeNull();
+    fireEvent.click(
+      screen.getByRole('button', { name: new RegExp(messages.auth.login.google, 'i') }),
+    );
+    expect(signIn).toHaveBeenCalledWith('google', { callbackUrl: '/dashboard' });
+  });
+
+  it('exibe erro do query param quando presente', () => {
+    vi.mocked(vi.fn()).mockReturnValue;
+    // Re-mock useSearchParams with an error param
+    vi.doMock('next/navigation', () => ({
+      useSearchParams: () => new URLSearchParams('error=AccessDenied'),
+      useRouter: () => ({ replace: vi.fn() }),
+    }));
   });
 });

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 // criar features admin (configs, métricas de domínio, billing, etc.).
 export default async function AdminHubPage() {
   const session = await getServerSession(authOptions);
-  if (session?.user?.role !== 'ADMIN') redirect('/');
+  if (session?.user?.role !== 'ADMIN') redirect('/dashboard');
   const t = await getTranslations('admin.hub');
 
   const bullUrl = process.env.BULL_DASHBOARD_URL;

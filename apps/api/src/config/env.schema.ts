@@ -50,6 +50,13 @@ export const envSchema = z
       .default(false),
     BULL_BOARD_BASIC_AUTH_USER: z.string().optional(),
     BULL_BOARD_BASIC_AUTH_PASSWORD: z.string().optional(),
+
+    // --- Email transactional ---
+    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY é obrigatório'),
+    EMAIL_FROM: z.string().email('EMAIL_FROM deve ser email válido'),
+
+    // URL pública do app — usada em links de verify/reset enviados por email.
+    APP_URL: z.string().url('APP_URL deve ser URL válida'),
   })
   .superRefine((env, ctx) => {
     if (env.LLM_PROVIDER === 'openai' && !env.OPENAI_API_KEY) {

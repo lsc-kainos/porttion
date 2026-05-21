@@ -5,8 +5,6 @@ vi.mock('@/lib/env', () => ({
   env: {
     GOOGLE_CLIENT_ID: 'g-id',
     GOOGLE_CLIENT_SECRET: 'g-secret',
-    GITHUB_CLIENT_ID: 'gh-id',
-    GITHUB_CLIENT_SECRET: 'gh-secret',
     NEXTAUTH_SECRET: 'a'.repeat(32),
     NEXTAUTH_URL: 'http://localhost:3000',
     API_URL: 'http://localhost:3001',

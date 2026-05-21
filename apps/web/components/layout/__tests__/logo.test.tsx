@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { Logo } from '../logo';
 
 describe('<Logo />', () => {
-  it('renderiza wordmark com texto Kainos', () => {
+  it('renderiza wordmark com texto Porttion', () => {
     render(<Logo />);
-    expect(screen.getByText('Kainos')).toBeInTheDocument();
+    expect(screen.getByText('Porttion')).toBeInTheDocument();
   });
 
   it('aceita className extra', () => {

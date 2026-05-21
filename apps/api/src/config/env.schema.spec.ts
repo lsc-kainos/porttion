@@ -10,6 +10,9 @@ const validRaw = {
   STORAGE_URL_SECRET: 'b'.repeat(32),
   INTERNAL_SERVICE_TOKEN: 'x'.repeat(32),
   LLM_PROVIDER: 'mock',
+  RESEND_API_KEY: 're_x',
+  EMAIL_FROM: 'no-reply@porttion.app',
+  APP_URL: 'https://porttion.app',
 };
 
 function omit<T extends Record<string, unknown>>(
@@ -157,6 +160,40 @@ describe('validateEnv', () => {
           BULL_BOARD_BASIC_AUTH_PASSWORD: 'secret',
         }),
       ).not.toThrow();
+    });
+  });
+
+  describe('Email e App URL', () => {
+    it('exige RESEND_API_KEY', () => {
+      expect(() => validateEnv(omit(validRaw, 'RESEND_API_KEY'))).toThrow(
+        /RESEND_API_KEY/,
+      );
+    });
+
+    it('exige EMAIL_FROM', () => {
+      expect(() => validateEnv(omit(validRaw, 'EMAIL_FROM'))).toThrow(
+        /EMAIL_FROM/,
+      );
+    });
+
+    it('rejeita EMAIL_FROM inválido', () => {
+      expect(() =>
+        validateEnv({ ...validRaw, EMAIL_FROM: 'naoEhEmail' }),
+      ).toThrow(/EMAIL_FROM/);
+    });
+
+    it('exige APP_URL', () => {
+      expect(() => validateEnv(omit(validRaw, 'APP_URL'))).toThrow(/APP_URL/);
+    });
+
+    it('rejeita APP_URL inválida', () => {
+      expect(() => validateEnv({ ...validRaw, APP_URL: 'nao-url' })).toThrow(
+        /APP_URL/,
+      );
+    });
+
+    it('aceita os 3 campos válidos', () => {
+      expect(() => validateEnv(validRaw)).not.toThrow();
     });
   });
 });

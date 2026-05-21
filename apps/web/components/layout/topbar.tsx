@@ -17,7 +17,7 @@ import type { NavItem } from './nav-links';
 export function Topbar({ user }: { user: NonNullable<Session['user']> }) {
   const t = useTranslations('topbar');
   const navItems: NavItem[] = [
-    { key: 'home', label: t('nav.home'), href: '/', enabled: true },
+    { key: 'home', label: t('nav.home'), href: '/dashboard', enabled: true },
     ...(user.role === 'ADMIN'
       ? [
           {

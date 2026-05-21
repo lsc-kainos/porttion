@@ -1,27 +1,24 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
+  href?: string;
   className?: string;
+  showWordmark?: boolean;
+  /** @deprecated size is no longer used — the logo has a fixed 32 px mark */
   size?: number;
 }
 
-// Logo neutro do template. Substitua pelo logo do seu projeto antes do deploy.
-export function Logo({ className, size = 22 }: LogoProps) {
+export function Logo({ href = '/', className, showWordmark = true }: LogoProps) {
   return (
-    <div className={cn('inline-flex items-center gap-2', className)}>
+    <Link href={href} className={cn('inline-flex items-center gap-2', className)}>
       <span
-        className="border-border bg-primary text-primary-foreground grid place-items-center rounded-md font-semibold tracking-tight"
-        style={{
-          width: size,
-          height: size,
-          fontSize: size * 0.55,
-          letterSpacing: '-0.04em',
-        }}
         aria-hidden
+        className="grid h-8 w-8 place-items-center rounded-md bg-[oklch(0.62_0.19_260)] text-sm font-semibold text-white"
       >
-        K
+        P
       </span>
-      <span className="text-sm font-medium tracking-tight sm:text-base">Kainos</span>
-    </div>
+      {showWordmark ? <span className="text-base font-medium tracking-tight">Porttion</span> : null}
+    </Link>
   );
 }
