@@ -1,3 +1,4 @@
+import type React from 'react';
 import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -14,7 +15,13 @@ import { NavLinks } from './nav-links';
 import { ThemeToggle } from './theme-toggle';
 import type { NavItem } from './nav-links';
 
-export function Topbar({ user }: { user: NonNullable<Session['user']> }) {
+export function Topbar({
+  user,
+  leadingSlot,
+}: {
+  user: NonNullable<Session['user']>;
+  leadingSlot?: React.ReactNode;
+}) {
   const t = useTranslations('topbar');
   const navItems: NavItem[] = [
     { key: 'home', label: t('nav.home'), href: '/dashboard', enabled: true },
@@ -33,6 +40,7 @@ export function Topbar({ user }: { user: NonNullable<Session['user']> }) {
 
   return (
     <header className="border-border/40 bg-background/90 fixed inset-x-0 top-0 z-50 flex h-14 flex-shrink-0 items-center gap-3 border-b px-4 backdrop-blur-md sm:gap-4 sm:px-6 lg:gap-6">
+      {leadingSlot}
       <Logo size={24} />
       <div className="bg-border/50 hidden h-6 w-px sm:block" />
 

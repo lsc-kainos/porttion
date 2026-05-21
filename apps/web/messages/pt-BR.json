@@ -116,6 +116,12 @@
     "subtitle": "Este é o template Kainos: auth, admin, storage, fila e ai-runtime já configurados.",
     "hint": "Adicione suas features em components/features/ e routes em app/(authed)/."
   },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "carteiras": "Carteiras",
+    "configuracoes": "Configurações",
+    "createFirstWallet": "Crie sua primeira carteira"
+  },
   "admin": {
     "hub": {
       "title": "Admin",
