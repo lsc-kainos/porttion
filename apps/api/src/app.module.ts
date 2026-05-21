@@ -20,6 +20,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { UserScopedThrottlerGuard } from './auth/guards/user-scoped-throttler.guard';
 import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
+import { MarketModule } from './market/market.module';
+import { WalletsModule } from './wallets/wallets.module';
+import { PositionsModule } from './positions/positions.module';
+import { AiAnalystModule } from './ai-analyst/ai-analyst.module';
 
 @Module({
   imports: [
@@ -38,6 +42,8 @@ import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
       // uso real. Ajuste por feature conforme adicionar buckets.
       { name: 'default', ttl: 60_000, limit: 600 },
       { name: 'auth-email', ttl: 15 * 60_000, limit: 5 },
+      { name: 'market', ttl: 60_000, limit: 60 },
+      { name: 'ai-analyst', ttl: 86_400_000, limit: 20 },
     ]),
     PrismaModule,
     HealthModule,
@@ -50,6 +56,10 @@ import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
     QueueModule,
     AiRuntimeModule,
     MetricsModule,
+    MarketModule,
+    WalletsModule,
+    PositionsModule,
+    AiAnalystModule,
     ...(process.env.BULL_BOARD_ENABLED === 'true'
       ? [BullBoardAdminModule]
       : []),

@@ -85,3 +85,12 @@ Enum `Role { USER, ADMIN }` no Prisma. `@Roles(Role.ADMIN)` em controllers admin
 Railway recomendado. Cada serviço (web, api, postgres, redis) vira um serviço Railway. Volume montado em `/data` no api. Env vars sincronizadas via service references (`${{api.INTERNAL_SERVICE_TOKEN}}`).
 
 Ver [`docs/deployment.md`](./deployment.md) para passo a passo.
+
+## Frontend Atomic Design (F1b+)
+
+A partir de F1b, `apps/web/components/` segue Atomic Design em 5 camadas. Tabela de
+regras está em `CLAUDE.md §Atomic Design`. Migração da base F1a aconteceu no
+commit isolado `refactor: migrate F1a to atomic design` da PR `feat/spec-01b-domain-and-ai`.
+
+Hooks de domínio vivem em `apps/web/hooks/` (fora de `components/`), separados por
+feature (`wallet/`, `market/`, `ai-analyst/`, `shared/`).

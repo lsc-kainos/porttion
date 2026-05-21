@@ -43,6 +43,21 @@ export const envSchema = z
     ),
     LLM_PROVIDER: z.enum(['openai', 'mock']).default('mock'),
 
+    // --- Market data adapter (yahoo-finance2) ---
+    MARKET_TIMEOUT_MS: z.coerce.number().int().positive().default(4000),
+    // Quando true, MarketService.validateTicker bypassa Yahoo e aceita
+    // qualquer ticker em formato válido. Usado em e2e/CI pra estabilidade.
+    MARKET_FIXTURE: z
+      .preprocess((v) => v === 'true' || v === true, z.boolean())
+      .default(false),
+
+    // --- AI runtime ---
+    // Quando true, AiRuntimeService.generateObject retorna fixture
+    // pré-gravada sem chamar OpenAI (CI/dev/e2e).
+    AI_RUNTIME_FIXTURE: z
+      .preprocess((v) => v === 'true' || v === true, z.boolean())
+      .default(false),
+
     // --- Fila distribuída (BullMQ) ---
     REDIS_URL: z.string().url().default('redis://localhost:6379'),
     BULL_BOARD_ENABLED: z

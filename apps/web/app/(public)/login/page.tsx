@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Login } from '@/components/features/login/login';
+import { Login } from '@/components/organisms/auth/login';
 
 export const metadata = { title: 'Entrar · Invoices' };
 

@@ -23,16 +23,17 @@ async function loginAs(page: Page, email = 'playwright@test.local') {
   const csrfRes = await page.request.get('/api/auth/csrf');
   const { csrfToken } = (await csrfRes.json()) as { csrfToken: string };
   await page.request.post('/api/auth/callback/e2e-test', {
-    form: { csrfToken, email, callbackUrl: '/' },
+    form: { csrfToken, email, callbackUrl: '/dashboard' },
     failOnStatusCode: false,
   });
-  await page.goto('/');
+  await page.goto('/dashboard');
 }
 
 test('login via credentials provider e fetch /me', async ({ page }) => {
   await loginAs(page);
-  await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { name: 'Nova nota', level: 1 })).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard/);
+  // Dashboard com zero carteiras: empty-state com heading "Comece aqui".
+  await expect(page.getByRole('heading', { name: /comece aqui/i })).toBeVisible();
 
   const me = await page.request.get('/api/v1/me');
   expect(me.ok()).toBe(true);
@@ -49,6 +50,6 @@ test('logout volta para /login', async ({ page }) => {
 });
 
 test('rota protegida sem login redireciona', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login/);
 });

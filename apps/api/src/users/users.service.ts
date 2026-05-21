@@ -32,7 +32,8 @@ export class UsersService {
   }
 
   async deleteByEmail(email: string): Promise<void> {
-    await this.prisma.user.delete({ where: { email } });
+    // Idempotente: testes podem chamar com email inexistente sem 500.
+    await this.prisma.user.deleteMany({ where: { email } });
   }
 
   private determineRole(email: string): Role {

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
-import { Logo } from '@/components/layout/logo';
-import { ForgotPasswordForm } from '@/components/features/auth/forgot-password-form';
+import { Logo } from '@/components/atoms/icons/brand/logo';
+import { ForgotPasswordForm } from '@/components/organisms/auth/forgot-password-form';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth.forgot');

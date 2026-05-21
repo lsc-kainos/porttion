@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
-import { Logo } from '@/components/layout/logo';
-import { SignupForm } from '@/components/features/auth/signup-form';
+import { Logo } from '@/components/atoms/icons/brand/logo';
+import { SignupForm } from '@/components/organisms/auth/signup-form';
 
 export default function SignupPage() {
   const t = useTranslations('auth.signup');
