@@ -1,10 +1,17 @@
 {
   "thresholds": {
-    "src/wallets/**": { "statements": 70 },
-    "src/positions/**": { "statements": 70 },
-    "src/market/**": { "statements": 70 },
-    "src/ai-analyst/**": { "statements": 70 },
-    "src/auth/guards/**": { "statements": 100 },
-    "src/wallets/wallets.service.ts": { "statements": 100 }
+    "src/wallets/wallets.service.ts": { "statements": 70 },
+    "src/wallets/wallets.controller.ts": { "statements": 70 },
+    "src/positions/positions.service.ts": { "statements": 70 },
+    "src/positions/positions.controller.ts": { "statements": 70 },
+    "src/market/market.service.ts": { "statements": 70 },
+    "src/market/market.controller.ts": { "statements": 70 },
+    "src/market/lru-cache.ts": { "statements": 70 },
+    "src/market/yahoo-symbol.ts": { "statements": 70 },
+    "src/ai-analyst/ai-analyst.service.ts": { "statements": 70 },
+    "src/ai-analyst/ai-analyst.controller.ts": { "statements": 70 },
+    "src/ai-analyst/asset-analysis.schema.ts": { "statements": 70 },
+    "src/auth/guards/roles.guard.ts": { "statements": 100 },
+    "src/auth/guards/user-scoped-throttler.guard.ts": { "statements": 100 }
   }
 }
