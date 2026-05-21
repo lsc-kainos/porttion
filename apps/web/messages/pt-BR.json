@@ -133,6 +133,34 @@
     }
   },
   "wallet": {
+    "kpi": {
+      "patrimonio": "Patrimônio",
+      "plTotal": "P&L total",
+      "plCaption": "Custo {custo}",
+      "variacaoDia": "Variação do dia",
+      "positionsCount": "Posições",
+      "positionsCaption": "{count, plural, =0 {Nenhuma posição} one {# ativo} other {# ativos}}"
+    },
+    "positions": {
+      "empty": "Nenhuma posição ainda.",
+      "ticker": "Ticker",
+      "qty": "Qtd",
+      "avgPrice": "Preço médio",
+      "quote": "Cotação",
+      "valor": "Valor",
+      "pl": "P&L"
+    },
+    "allocation": {
+      "title": "Alocação",
+      "empty": "Sem dados de alocação ainda.",
+      "classes": {
+        "acoes_br": "Ações BR",
+        "etf": "ETFs",
+        "renda_fixa": "Renda fixa",
+        "cripto": "Cripto",
+        "moeda": "Moeda"
+      }
+    },
     "create": {
       "title": "Nova carteira",
       "name": { "label": "Nome" },
@@ -197,6 +225,11 @@
     }
   },
   "position": {
+    "row": { "unavailable": "indisponível" },
+    "card": {
+      "unavailable": "indisponível",
+      "qtyAvg": "{qty} × {avg}"
+    },
     "add": {
       "title": "Adicionar posição",
       "ticker": { "label": "Ticker" },
@@ -237,6 +270,24 @@
     },
     "row": {
       "qty": "{qty} unidade(s)"
+    }
+  },
+  "dashboard": {
+    "title": "Visão geral",
+    "evolution": {
+      "title": "Evolução do patrimônio",
+      "headline": "Em breve",
+      "body": "Gráfico interativo de evolução chega quando movimentos forem registrados (F5)."
+    },
+    "aiInsight": {
+      "title": "Insight do dia",
+      "headline": "Em breve",
+      "body": "Banner narrativo gerado por IA — chega após dois dias de histórico."
+    },
+    "watchlist": {
+      "title": "Watchlist",
+      "headline": "Em breve",
+      "body": "Acompanhamento de ativos fora da carteira chega na F2."
     }
   },
   "admin": {
