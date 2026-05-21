@@ -100,10 +100,14 @@ test.describe('F1b — vertical slice', () => {
     await page.getByRole('button', { name: /^criar$/i }).click();
 
     // 4. navigate to carteira detail to add position
-    // After wallet creation the dashboard re-renders; navigate to /carteiras to find it
+    // After wallet creation the dashboard re-renders; navigate to /carteiras to find it.
+    // Target the heading inside WalletCardLarge specifically — getByText('Principal')
+    // alone would also match the wallet-switcher button in the sidebar (which renders
+    // the active wallet name) and clicking that opens a popover instead of navigating.
     await page.goto('/carteiras');
-    await page.getByText('Principal').first().click();
-    await expect(page).toHaveURL(/\/carteiras\//);
+    await expect(page.getByRole('heading', { name: 'Principal' })).toBeVisible({ timeout: 15_000 });
+    await page.getByRole('heading', { name: 'Principal' }).click();
+    await expect(page).toHaveURL(/\/carteiras\/.+/);
 
     const addBtn = page.getByRole('button', { name: /adicionar posi/i });
     await expect(addBtn).toBeVisible();

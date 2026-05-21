@@ -24,9 +24,12 @@ export default defineConfig({
       timeout: 120_000,
     },
   ],
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  retries: process.env.CI ? 1 : 0,
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
   projects: [
     {
