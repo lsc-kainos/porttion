@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: lint + typecheck + build + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Install
+        run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        env:
+          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_SECRET: ci-build-secret-must-be-at-least-32-chars
+          GOOGLE_CLIENT_ID: ci
+          GOOGLE_CLIENT_SECRET: ci
+          GITHUB_CLIENT_ID: ci
+          GITHUB_CLIENT_SECRET: ci
+          ADMIN_EMAILS: ''
+          API_URL: http://localhost:3001
+          DATABASE_URL: postgresql://kainos:kainos@localhost:5432/kainos
+          ALLOWED_ORIGINS: http://localhost:3000
+          INTERNAL_SERVICE_TOKEN: ci-internal-service-token-must-be-at-least-32-chars
+          STORAGE_URL_SECRET: ci-storage-url-secret-must-be-at-least-32-chars
+          VOLUME_ROOT: /tmp/ci-volume
+        run: npm run build
+
+      - name: Test
+        env:
+          NEXTAUTH_SECRET: ci-build-secret-must-be-at-least-32-chars
+          DATABASE_URL: postgresql://kainos:kainos@localhost:5432/kainos
+          ALLOWED_ORIGINS: http://localhost:3000
+          INTERNAL_SERVICE_TOKEN: ci-internal-service-token-must-be-at-least-32-chars
+          STORAGE_URL_SECRET: ci-storage-url-secret-must-be-at-least-32-chars
+          VOLUME_ROOT: /tmp/ci-volume
+        run: npm run test

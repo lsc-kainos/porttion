@@ -1,0 +1,57 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "NODE_ENV",
+        "NEXTAUTH_URL",
+        "NEXTAUTH_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "ADMIN_EMAILS",
+        "API_URL",
+        "DATABASE_URL",
+        "ALLOWED_ORIGINS",
+        "PORT",
+        "INTERNAL_SERVICE_TOKEN",
+        "STORAGE_DRIVER",
+        "VOLUME_ROOT",
+        "STORAGE_URL_SECRET",
+        "UPLOAD_MAX_BYTES",
+        "R2_ACCOUNT_ID",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "R2_BUCKET",
+        "OPENAI_API_KEY",
+        "LLM_PROVIDER",
+        "REDIS_URL",
+        "BULL_BOARD_ENABLED",
+        "BULL_BOARD_BASIC_AUTH_USER",
+        "BULL_BOARD_BASIC_AUTH_PASSWORD",
+        "BULL_DASHBOARD_URL"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

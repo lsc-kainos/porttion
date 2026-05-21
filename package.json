@@ -1,0 +1,51 @@
+{
+  "name": "kainos-template-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template Kainos: NextAuth (Google+GitHub) + NestJS + Prisma + BullMQ + Storage abstrato + ai-runtime. Base para novos produtos.",
+  "packageManager": "npm@10.9.4",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\" --ignore-path .prettierignore",
+    "env:link": "bash scripts/env-link.sh",
+    "db:up": "docker compose up -d postgres redis",
+    "db:down": "docker compose down",
+    "db:setup": "bash scripts/db-setup.sh",
+    "db:studio": "npm --workspace=@kainos/api exec -- prisma studio"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.4.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "zod": "$zod"
+  }
+}

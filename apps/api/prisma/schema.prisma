@@ -1,0 +1,49 @@
+// Schema Prisma — kainos-template-app
+// Aprenda mais: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  llmConfigs LlmConfig[]
+}
+
+// LlmConfig: versionamento genérico de configs LLM.
+// `key` é string livre — cada projeto define suas próprias keys
+// (ex: "extractor", "chat", "summarizer", "classifier").
+// Para desligar este módulo, remova o model + LlmConfigService + AiRuntimeModule.
+model LlmConfig {
+  id        String   @id @default(cuid())
+  key       String
+  version   Int
+  model     String
+  prompt    String   @db.Text
+  params    Json
+  active    Boolean  @default(false)
+  notes     String?  @db.Text
+  createdBy String
+  creator   User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([key, version])
+  @@index([key, active])
+}
