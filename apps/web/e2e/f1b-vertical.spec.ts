@@ -87,8 +87,9 @@ test.describe('F1b — vertical slice', () => {
     await page.getByRole('button', { name: /entrar/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    // 2. zero wallets → empty state
-    await expect(page.getByText(/crie sua primeira carteira/i)).toBeVisible();
+    // 2. zero wallets → empty state (use unique heading; the subtitle text
+    // also appears in the wallet-switcher CTA so getByText would multi-match)
+    await expect(page.getByRole('heading', { name: /comece aqui/i })).toBeVisible();
 
     // 3. create wallet
     await page
