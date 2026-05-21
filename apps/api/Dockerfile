@@ -27,7 +27,9 @@ COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/apps/api/prisma ./apps/api/prisma
 COPY --from=build /app/apps/api/package.json ./apps/api/
+COPY --from=build /app/apps/api/tsconfig.json ./apps/api/
 COPY --from=build /app/package.json ./
+COPY --from=build /app/tsconfig.base.json ./
 COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 3001
