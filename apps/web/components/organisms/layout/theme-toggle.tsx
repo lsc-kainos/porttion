@@ -3,7 +3,12 @@
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { Sun, Moon, Monitor } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/atoms/ui/tooltip';
 
 const CYCLE: Record<string, string> = { light: 'dark', dark: 'system', system: 'light' };
 const ICONS: Record<string, React.ElementType> = { light: Sun, dark: Moon, system: Monitor };

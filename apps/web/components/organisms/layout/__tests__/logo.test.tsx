@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Logo } from '../logo';
+import { Logo } from '@/components/atoms/icons/brand/logo';
 
 describe('<Logo />', () => {
   it('renderiza wordmark com texto Porttion', () => {

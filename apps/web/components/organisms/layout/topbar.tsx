@@ -7,8 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Logo } from './logo';
+} from '@/components/atoms/ui/dropdown-menu';
+import { Logo } from '@/components/atoms/icons/brand/logo';
 import { UserMenu } from './user-menu';
 import { NavLinks } from './nav-links';
 import { ThemeToggle } from './theme-toggle';

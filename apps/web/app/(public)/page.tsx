@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Logo } from '@/components/layout/logo';
-import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/atoms/icons/brand/logo';
+import { Button } from '@/components/atoms/ui/button';
 
 export default function LandingPage() {
   return (

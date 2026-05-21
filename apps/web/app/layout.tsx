@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
-import { Providers } from '@/components/layout/providers';
+import { Providers } from '@/components/organisms/layout/providers';
 import './globals.css';
 
 const inter = Inter({

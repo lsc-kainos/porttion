@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Logo } from '@/components/layout/logo';
-import { ResetPasswordForm } from '@/components/features/auth/reset-password-form';
+import { Logo } from '@/components/atoms/icons/brand/logo';
+import { ResetPasswordForm } from '@/components/organisms/auth/reset-password-form';
 
 interface Props {
   params: Promise<{ token: string }>;

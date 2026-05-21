@@ -44,18 +44,43 @@ O template traz um job de exemplo em `apps/api/src/queue/example/`. Para criar u
 
 ### shadcn/ui (componentes copiados), não MUI/Chakra
 
-Componentes ficam em `apps/web/components/ui/`, não em `node_modules`. MCP server `shadcn` em `.claude/settings.local.json`.
+Componentes ficam em `apps/web/components/atoms/ui/`, não em `node_modules`. MCP server `shadcn` em `.claude/settings.local.json`.
 
-### Estrutura plana de componentes com hooks de domínio (NÃO Atomic Design)
+### Atomic Design — 5 camadas
 
 ```
-apps/web/components/
-├── ui/                              # primitivos shadcn
-├── features/<feature>/
-│   ├── <feature>.tsx                # apresentação pura
-│   └── use-<feature>.ts             # lógica, fetch, estado
-└── layout/                          # header, sidebar, providers
+apps/web/
+├── components/
+│   ├── atoms/                       # primitivos puros (shadcn ui, ícones, charts, typography)
+│   │   ├── ui/                      # shadcn primitives
+│   │   ├── charts/                  # wrappers recharts + SVG próprios
+│   │   ├── icons/                   # asset icons, brand
+│   │   └── typography/              # eyebrow, editorial quote
+│   ├── molecules/                   # composições de atoms; estado local simples
+│   ├── organisms/                   # features completas; fetch via SWR; conhecem domínio
+│   │   ├── auth/
+│   │   ├── layout/
+│   │   ├── wallet/
+│   │   ├── asset/
+│   │   ├── ai-analyst/
+│   │   ├── landing/
+│   │   └── settings/
+│   ├── templates/                   # slots de layout puros
+│   └── providers/                   # client providers (wallet switcher, theme, session)
+├── hooks/                           # FORA de components/
+│   ├── wallet/  market/  ai-analyst/  shared/
+└── app/                             # pages (App Router)
 ```
+
+| Camada    | Pode                                                           | Não pode                                         |
+| --------- | -------------------------------------------------------------- | ------------------------------------------------ |
+| atoms     | Receber props; renderizar primitivos                           | Conhecer API, ler context, ter estado de domínio |
+| molecules | Compor atoms; estado local (open/close, foco)                  | Fetch, conhecer rotas                            |
+| organisms | Compor atoms/molecules; chamar hooks de domínio; fetch via SWR | Importar organisms de outra feature              |
+| templates | Slots de layout + props de slot                                | Estado, fetch, lógica                            |
+| pages     | Compor templates + organisms; receber `params/searchParams`    | Renderizar atoms direto                          |
+
+**Regra de import:** atom não importa de molecule/organism/template/page. Molecule não importa de organism. Organisms de features distintas não se importam entre si — composição rola na page.
 
 ### Módulos do NestJS separados por responsabilidade
 
@@ -137,7 +162,6 @@ Para rodar **um único teste**:
 
 - Multi-provider LLM (Anthropic, Google) no ai-runtime
 - en-US ativo no i18n
-- Atomic Design (atualmente flat)
 - Observabilidade avançada (Prometheus, tracing, structured logs)
 - Cache de respostas LLM
 - 2FA, SSO empresarial
