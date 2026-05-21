@@ -23,6 +23,7 @@ import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
 import { MarketModule } from './market/market.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { PositionsModule } from './positions/positions.module';
+import { AiAnalystModule } from './ai-analyst/ai-analyst.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { PositionsModule } from './positions/positions.module';
     MarketModule,
     WalletsModule,
     PositionsModule,
+    AiAnalystModule,
     ...(process.env.BULL_BOARD_ENABLED === 'true'
       ? [BullBoardAdminModule]
       : []),
