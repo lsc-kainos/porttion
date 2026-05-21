@@ -6,7 +6,10 @@
     "cancel": "Cancelar",
     "save": "Salvar",
     "continue": "Continuar",
-    "back": "Voltar"
+    "back": "Voltar",
+    "delete": "Excluir",
+    "deleting": "Excluindo…",
+    "typeToConfirm": "Digite \"{text}\" para confirmar"
   },
   "errors": {
     "unknown": "Não conseguimos completar a operação. Tente de novo em instantes."
@@ -121,6 +124,120 @@
     "carteiras": "Carteiras",
     "configuracoes": "Configurações",
     "createFirstWallet": "Crie sua primeira carteira"
+  },
+  "asset": {
+    "search": {
+      "placeholder": "Buscar ticker…",
+      "loading": "Carregando…",
+      "empty": "Nenhum resultado."
+    }
+  },
+  "wallet": {
+    "create": {
+      "title": "Nova carteira",
+      "name": { "label": "Nome" },
+      "currency": { "label": "Moeda base" },
+      "strategy": {
+        "label": "Estratégia",
+        "none": "Sem estratégia",
+        "options": {
+          "balanceada": "Balanceada",
+          "crescimento": "Crescimento",
+          "renda": "Renda",
+          "personalizada": "Personalizada"
+        }
+      },
+      "cancel": "Cancelar",
+      "submit": "Criar",
+      "submitting": "Criando…",
+      "errors": {
+        "duplicate": "Você já tem uma carteira com esse nome",
+        "generic": "Não foi possível criar agora"
+      }
+    },
+    "edit": {
+      "title": "Editar carteira",
+      "name": { "label": "Nome" },
+      "strategy": {
+        "label": "Estratégia",
+        "none": "Sem estratégia",
+        "options": {
+          "balanceada": "Balanceada",
+          "crescimento": "Crescimento",
+          "renda": "Renda",
+          "personalizada": "Personalizada"
+        }
+      },
+      "cancel": "Cancelar",
+      "submit": "Salvar",
+      "submitting": "Salvando…",
+      "errors": {
+        "duplicate": "Você já tem uma carteira com esse nome",
+        "generic": "Não foi possível salvar agora"
+      }
+    },
+    "delete": {
+      "title": "Excluir \"{name}\"",
+      "message": "{count, plural, =0 {Esta carteira está vazia.} one {Você vai apagar # posição com a carteira.} other {Você vai apagar # posições com a carteira.}} Esta ação é definitiva."
+    },
+    "list": {
+      "title": "Suas carteiras",
+      "newCta": "Nova carteira",
+      "empty": {
+        "title": "Comece aqui",
+        "subtitle": "Crie sua primeira carteira pra começar a acompanhar seus ativos.",
+        "cta": "Criar carteira"
+      }
+    },
+    "card": {
+      "stale": "cotação indisponível",
+      "patrimonio": "Patrimônio",
+      "pl": "P&L total",
+      "positions": "{count, plural, =0 {sem posições} one {# posição} other {# posições}}"
+    }
+  },
+  "position": {
+    "add": {
+      "title": "Adicionar posição",
+      "ticker": { "label": "Ticker" },
+      "qty": { "label": "Quantidade" },
+      "price": { "label": "Preço médio" },
+      "cancel": "Cancelar",
+      "submit": "Adicionar",
+      "submitting": "Adicionando…",
+      "errors": {
+        "duplicate": "Esta carteira já tem esse ticker",
+        "invalidTicker": "Ticker não encontrado",
+        "generic": "Não foi possível adicionar agora"
+      }
+    },
+    "edit": {
+      "title": "Editar posição",
+      "ticker": { "label": "Ticker" },
+      "qty": { "label": "Quantidade" },
+      "price": { "label": "Preço médio" },
+      "cancel": "Cancelar",
+      "submit": "Salvar",
+      "submitting": "Salvando…",
+      "errors": {
+        "invalid": "Dados inválidos",
+        "generic": "Não foi possível salvar agora"
+      }
+    }
+  },
+  "carteira": {
+    "eyebrow": "Carteira",
+    "notFound": "Carteira não encontrada.",
+    "positionsSection": "Posições",
+    "noPositions": "Nenhuma posição ainda.",
+    "actions": {
+      "addPosition": "Adicionar posição",
+      "edit": "Editar carteira",
+      "delete": "Excluir carteira"
+    },
+    "row": {
+      "qty": "{qty} unidade(s)"
+    }
   },
   "admin": {
     "hub": {
