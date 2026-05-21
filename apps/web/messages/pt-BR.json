@@ -130,6 +130,53 @@
       "placeholder": "Buscar ticker…",
       "loading": "Carregando…",
       "empty": "Nenhum resultado."
+    },
+    "chart": {
+      "empty": "Sem dados de cotação para este período."
+    },
+    "header": {
+      "eyebrow": "Ativo",
+      "loadingQuote": "Carregando cotação…"
+    },
+    "stats": {
+      "open": "Abertura",
+      "high": "Máx (dia)",
+      "low": "Mín (dia)",
+      "high52": "Máx período",
+      "low52": "Mín período",
+      "unavailable": "Estatísticas indisponíveis"
+    }
+  },
+  "ai": {
+    "analysis": {
+      "title": "Análise técnica do ativo",
+      "empty": {
+        "body": "Gere uma análise técnica baseada nos últimos 7 dias de candles.",
+        "cta": "Analisar agora"
+      },
+      "loading": {
+        "body": "Lendo {days} dias de candles e gerando análise…"
+      },
+      "error": {
+        "retry": "Tentar de novo"
+      },
+      "done": {
+        "tendencia": "Tendência",
+        "confianca": "Confiança",
+        "horizonte": "Horizonte",
+        "refresh": "Atualizar",
+        "reco": {
+          "comprar": "Comprar",
+          "manter": "Manter",
+          "nao_comprar": "Não comprar"
+        }
+      },
+      "disclaimer": "Análise técnica gerada por IA. Não é recomendação de investimento.",
+      "errors": {
+        "ticker_invalid": "Ticker não encontrado",
+        "candles_short": "Dados de cotação insuficientes para análise",
+        "generic": "Análise indisponível agora — tente novamente em alguns minutos"
+      }
     }
   },
   "wallet": {
