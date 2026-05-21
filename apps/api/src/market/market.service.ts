@@ -220,6 +220,24 @@ export class MarketService {
   }
 
   async validateTicker(ticker: string): Promise<MarketAsset> {
+    // Fixture mode (e2e/CI): aceita qualquer ticker em formato válido sem
+    // bater na rede. Sem isso, e2e seria flaky por Yahoo offline/rate-limit.
+    if (this.config.get<boolean>('MARKET_FIXTURE')) {
+      const t = ticker.toUpperCase();
+      if (!/^[A-Z0-9]{2,12}$/.test(t)) {
+        throw new UnprocessableEntityException({
+          statusCode: 422,
+          message: 'Ticker desconhecido',
+          ticker,
+        });
+      }
+      return {
+        ticker: t,
+        name: t,
+        assetClass: inferAssetClass(t),
+        exchange: 'SAO',
+      };
+    }
     const found = await this.search(ticker, 5);
     const exact = found.find((m) => m.ticker === ticker.toUpperCase());
     if (!exact)

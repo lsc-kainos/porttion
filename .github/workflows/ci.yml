@@ -129,6 +129,7 @@ jobs:
           ALLOWED_ORIGINS: http://localhost:3000
           API_URL: http://localhost:3001
           AI_RUNTIME_FIXTURE: 'true'
+          MARKET_FIXTURE: 'true'
           RESEND_API_KEY: re_test_key
           EMAIL_FROM: e2e@porttion.test
           APP_URL: http://localhost:3000

@@ -45,6 +45,11 @@ export const envSchema = z
 
     // --- Market data adapter (yahoo-finance2) ---
     MARKET_TIMEOUT_MS: z.coerce.number().int().positive().default(4000),
+    // Quando true, MarketService.validateTicker bypassa Yahoo e aceita
+    // qualquer ticker em formato válido. Usado em e2e/CI pra estabilidade.
+    MARKET_FIXTURE: z
+      .preprocess((v) => v === 'true' || v === true, z.boolean())
+      .default(false),
 
     // --- AI runtime ---
     // Quando true, AiRuntimeService.generateObject retorna fixture
