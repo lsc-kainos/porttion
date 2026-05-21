@@ -13,7 +13,17 @@ import { SyncUserDto } from './dto/sync-user.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
 
 @Controller('api/v1/internal/users')
-@SkipThrottle({ benchmark: true })
+// Internal S2S endpoint chamado pelo web no jwtCallback do NextAuth. Sob carga
+// concorrente (CI rodando suite de e2e) a bucket `default` estoura e o web
+// passa a falhar com "User sync failed (429)". Marcamos a controller pra
+// pular todas as buckets nomeadas — auth/segurança aqui vem do
+// InternalServiceGuard, não do throttler.
+@SkipThrottle({
+  default: true,
+  'auth-email': true,
+  market: true,
+  'ai-analyst': true,
+})
 export class InternalUsersController {
   constructor(private readonly users: UsersService) {}
 

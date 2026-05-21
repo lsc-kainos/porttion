@@ -10,6 +10,7 @@ function createPrismaMock() {
       findUnique: jest.fn(),
       upsert: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
   };
 }
@@ -146,13 +147,13 @@ describe('UsersService.upsertByEmail', () => {
 });
 
 describe('UsersService.deleteByEmail', () => {
-  it('chama prisma.user.delete por email', async () => {
+  it('chama prisma.user.deleteMany por email (idempotente)', async () => {
     const { service, prisma } = await buildService();
-    prisma.user.delete.mockResolvedValue({ id: 'gone' });
+    prisma.user.deleteMany.mockResolvedValue({ count: 1 });
 
     await service.deleteByEmail('gone@x.com');
 
-    expect(prisma.user.delete).toHaveBeenCalledWith({
+    expect(prisma.user.deleteMany).toHaveBeenCalledWith({
       where: { email: 'gone@x.com' },
     });
   });
