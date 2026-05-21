@@ -7,7 +7,7 @@ interface AuthedRequest {
   user: { id: string };
 }
 
-@Controller({ path: 'analyst', version: '1' })
+@Controller('api/v1/analyst')
 export class AiAnalystController {
   constructor(private readonly analyst: AiAnalystService) {}
 

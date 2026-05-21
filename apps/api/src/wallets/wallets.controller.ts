@@ -17,7 +17,7 @@ interface AuthedRequest {
   user: { id: string };
 }
 
-@Controller({ path: 'wallets', version: '1' })
+@Controller('api/v1/wallets')
 export class WalletsController {
   constructor(private readonly wallets: WalletsService) {}
 

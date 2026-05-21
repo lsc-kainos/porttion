@@ -4,7 +4,7 @@ import { MarketService } from './market.service';
 import { SearchMarketDto } from './dto/search-market.dto';
 import { OhlcQueryDto } from './dto/ohlc-query.dto';
 
-@Controller({ path: 'market', version: '1' })
+@Controller('api/v1/market')
 @Throttle({ market: { limit: 60, ttl: 60_000 } })
 export class MarketController {
   constructor(private readonly market: MarketService) {}

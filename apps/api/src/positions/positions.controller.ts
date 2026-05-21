@@ -16,7 +16,7 @@ interface AuthedRequest {
   user: { id: string };
 }
 
-@Controller({ version: '1' })
+@Controller('api/v1')
 export class PositionsController {
   constructor(private readonly positions: PositionsService) {}
 
