@@ -230,7 +230,8 @@
     "search": {
       "placeholder": "Buscar ticker…",
       "loading": "Carregando…",
-      "empty": "Nenhum resultado."
+      "empty": "Nenhum resultado.",
+      "error": "Busca indisponível no momento. Tente novamente em instantes."
     },
     "chart": {
       "empty": "Sem dados de cotação para este período."

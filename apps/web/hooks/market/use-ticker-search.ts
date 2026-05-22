@@ -14,6 +14,8 @@ export function useTickerSearch(query: string) {
     debounced.trim().length >= 2
       ? `/v1/market/search?q=${encodeURIComponent(debounced.trim())}&limit=8`
       : null,
-    { keepPreviousData: true },
+    // shouldRetryOnError: false — 503 upstream não deve gerar burst de retries
+    // contra Yahoo enquanto o usuário digita.
+    { keepPreviousData: true, shouldRetryOnError: false },
   );
 }

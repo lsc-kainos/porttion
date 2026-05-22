@@ -20,7 +20,7 @@ interface Props {
 export function TickerSearchInput({ value, onChange }: Props) {
   const t = useTranslations('asset.search');
   const [query, setQuery] = useState(value?.ticker ?? '');
-  const { data, isLoading } = useTickerSearch(query);
+  const { data, isLoading, error } = useTickerSearch(query);
 
   return (
     <Command shouldFilter={false} className="rounded-md border">
@@ -32,7 +32,8 @@ export function TickerSearchInput({ value, onChange }: Props) {
       />
       <CommandList>
         {isLoading ? <CommandEmpty>{t('loading')}</CommandEmpty> : null}
-        {!isLoading && (!data || data.length === 0) ? (
+        {!isLoading && error ? <CommandEmpty>{t('error')}</CommandEmpty> : null}
+        {!isLoading && !error && (!data || data.length === 0) ? (
           <CommandEmpty>{t('empty')}</CommandEmpty>
         ) : null}
         {data && data.length > 0 ? (
