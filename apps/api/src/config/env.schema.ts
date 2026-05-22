@@ -43,9 +43,16 @@ export const envSchema = z
     ),
     LLM_PROVIDER: z.enum(['openai', 'mock']).default('mock'),
 
-    // --- Market data adapter (yahoo-finance2) ---
+    // --- Market data adapter ---
+    // Driver: 'yahoo' = yahoo-finance2 (default); 'brapi' = brapi.dev
+    // (recomendado em prod/staging: Yahoo bloqueia IPs de cloud com 503).
+    MARKET_DRIVER: z.enum(['yahoo', 'brapi']).default('yahoo'),
     MARKET_TIMEOUT_MS: z.coerce.number().int().positive().default(4000),
-    // Quando true, MarketService.validateTicker bypassa Yahoo e aceita
+    // Token BRAPI — obrigatório quando MARKET_DRIVER=brapi. Free tier em
+    // brapi.dev/dashboard.
+    BRAPI_TOKEN: z.string().optional(),
+    BRAPI_BASE_URL: z.string().url().default('https://brapi.dev/api'),
+    // Quando true, MarketService.validateTicker bypassa o provider e aceita
     // qualquer ticker em formato válido. Usado em e2e/CI pra estabilidade.
     MARKET_FIXTURE: z
       .preprocess((v) => v === 'true' || v === true, z.boolean())
@@ -109,6 +116,13 @@ export const envSchema = z
           });
         }
       }
+    }
+    if (env.MARKET_DRIVER === 'brapi' && !env.BRAPI_TOKEN) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['BRAPI_TOKEN'],
+        message: 'BRAPI_TOKEN é obrigatória quando MARKET_DRIVER=brapi',
+      });
     }
     if (env.QUEUE_ENABLED && !env.REDIS_URL) {
       ctx.addIssue({

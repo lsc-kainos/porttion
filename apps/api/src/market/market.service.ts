@@ -1,36 +1,23 @@
 import {
+  Inject,
   Injectable,
   Logger,
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import yahooFinanceRaw from 'yahoo-finance2';
-
-type YfClient = {
-  search(
-    q: string,
-    opts?: Record<string, unknown>,
-  ): Promise<{ quotes?: unknown[] }>;
-  quote(symbol: string | string[]): Promise<unknown>;
-  historical(
-    symbol: string,
-    opts?: Record<string, unknown>,
-  ): Promise<unknown[]>;
-};
-
-// yahoo-finance2 is ESM; we import it normally but cast to a stable interface
-// to avoid ESLint type errors caused by conditional overload resolution.
-const yf = yahooFinanceRaw as unknown as YfClient;
-
 import type {
-  MarketAsset,
-  Quote,
   Candle,
+  MarketAsset,
   OhlcPeriod,
+  Quote,
 } from '@kainos/shared-types';
 import { LruCache } from './lru-cache';
-import { toYahooSymbol, inferAssetClass } from './yahoo-symbol';
+import { inferAssetClass } from './yahoo-symbol';
+import {
+  MARKET_PROVIDER,
+  type MarketProvider,
+} from './providers/market-provider.interface';
 
 @Injectable()
 export class MarketService {
@@ -49,59 +36,31 @@ export class MarketService {
     ttlMs: 60 * 60_000,
   });
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    @Inject(MARKET_PROVIDER) private readonly provider: MarketProvider,
+  ) {}
 
   async search(q: string, limit = 10): Promise<MarketAsset[]> {
     const key = `${q.toUpperCase()}:${limit}`;
     const hit = this.searchCache.get(key);
     if (hit) return hit;
-    let res: { quotes?: unknown[] };
+    let out: MarketAsset[];
     try {
-      res = await yf.search(q, { newsCount: 0 });
+      out = await this.provider.search(q, limit);
     } catch (err) {
-      // Falha upstream (Yahoo offline, crumb/cookie inválido, rate-limit, rede).
-      // Antes engolíamos como `[]`, o que cacheava o vazio e mascarava a falha.
-      // Agora propaga 503 pro cliente distinguir indisponível de "sem resultado".
       this.logger.error({
         event: 'market.search.failed',
+        provider: this.provider.name,
         q,
         err: (err as Error).message,
       });
       throw new ServiceUnavailableException({
         statusCode: 503,
         message: 'Busca de ativos indisponível',
-        upstream: 'yahoo-finance',
+        upstream: this.provider.name,
       });
     }
-    type QuoteItem = {
-      symbol?: string;
-      shortname?: string;
-      longname?: string;
-      quoteType?: string;
-      exchange?: string;
-    };
-    const rawQuotes = (res.quotes ?? []).map((x) => x as QuoteItem);
-    const out: MarketAsset[] = rawQuotes
-      .filter(
-        (it): it is QuoteItem & { symbol: string } =>
-          typeof it.symbol === 'string',
-      )
-      .slice(0, limit)
-      .map((it) => {
-        const ticker = it.symbol
-          .replace(/\.SA$/, '')
-          .replace(/-USD$/, '')
-          .replace(/BRL=X$/, '');
-        return {
-          ticker: ticker.toUpperCase(),
-          name: it.shortname ?? it.longname ?? it.symbol,
-          assetClass: inferAssetClass(ticker, {
-            quoteType: it.quoteType,
-            exchange: it.exchange,
-          }),
-          exchange: it.exchange ?? null,
-        };
-      });
     // Não cachear vazio — uma falha transitória que retorne 0 itens não pode
     // congelar a busca por 1h pra essa query.
     if (out.length > 0) this.searchCache.set(key, out);
@@ -112,15 +71,14 @@ export class MarketService {
     const key = ticker.toUpperCase();
     const cached = this.quoteCache.get(key);
     if (cached !== undefined) return cached;
-    const symbol = toYahooSymbol(key);
     try {
-      const res = await yf.quote(symbol);
-      const q = this.parseQuote(key, res);
+      const q = await this.provider.quote(key);
       this.quoteCache.set(key, q);
       return q;
     } catch (err) {
       this.logger.warn({
         event: 'market.quote.failed',
+        provider: this.provider.name,
         ticker: key,
         err: (err as Error).message,
       });
@@ -139,25 +97,17 @@ export class MarketService {
       else toFetch.push(k);
     }
     if (toFetch.length === 0) return out;
-    const symbols = toFetch.map(toYahooSymbol);
     try {
-      const res = await yf.quote(symbols);
-      const arr = Array.isArray(res) ? res : [res];
-      const bySymbol = new Map<string, unknown>();
-      for (const item of arr) {
-        const sym = (item as { symbol?: string }).symbol;
-        if (sym) bySymbol.set(sym, item);
-      }
+      const fetched = await this.provider.quoteMany(toFetch);
       for (const k of toFetch) {
-        const sym = toYahooSymbol(k);
-        const raw = bySymbol.get(sym);
-        const q = raw ? this.parseQuote(k, raw) : null;
+        const q = fetched.get(k) ?? null;
         this.quoteCache.set(k, q);
         out.set(k, q);
       }
     } catch (err) {
       this.logger.warn({
         event: 'market.quoteMany.failed',
+        provider: this.provider.name,
         count: toFetch.length,
         err: (err as Error).message,
       });
@@ -173,66 +123,24 @@ export class MarketService {
     const key = `${ticker.toUpperCase()}:${period}`;
     const cached = this.ohlcCache.get(key);
     if (cached) return cached;
-    const { period1 } = this.periodToDates(period);
-    const symbol = toYahooSymbol(ticker.toUpperCase());
-    let raw: unknown[] = [];
     try {
-      raw = await yf.historical(symbol, {
-        period1,
-        interval: '1d',
-      });
+      const candles = await this.provider.ohlc(ticker, period);
+      this.ohlcCache.set(key, candles);
+      return candles;
     } catch (err) {
-      // fallback: tenta sem .SA
-      if (symbol.endsWith('.SA')) {
-        try {
-          raw = await yf.historical(ticker.toUpperCase(), {
-            period1,
-            interval: '1d',
-          });
-        } catch (err2) {
-          this.logger.warn({
-            event: 'market.ohlc.failed',
-            ticker,
-            err: (err2 as Error).message,
-          });
-          return [];
-        }
-      } else {
-        this.logger.warn({
-          event: 'market.ohlc.failed',
-          ticker,
-          err: (err as Error).message,
-        });
-        return [];
-      }
+      this.logger.warn({
+        event: 'market.ohlc.failed',
+        provider: this.provider.name,
+        ticker,
+        err: (err as Error).message,
+      });
+      return [];
     }
-    const candles: Candle[] = raw
-      .map((r) => {
-        const row = r as {
-          date: Date;
-          open: number;
-          high: number;
-          low: number;
-          close: number;
-          volume: number;
-        };
-        return {
-          date: row.date.toISOString().slice(0, 10),
-          open: row.open,
-          high: row.high,
-          low: row.low,
-          close: row.close,
-          volume: row.volume,
-        };
-      })
-      .filter((c) => Number.isFinite(c.open) && Number.isFinite(c.close));
-    this.ohlcCache.set(key, candles);
-    return candles;
   }
 
   async validateTicker(ticker: string): Promise<MarketAsset> {
     // Fixture mode (e2e/CI): aceita qualquer ticker em formato válido sem
-    // bater na rede. Sem isso, e2e seria flaky por Yahoo offline/rate-limit.
+    // bater na rede. Sem isso, e2e seria flaky por upstream offline.
     if (this.config.get<boolean>('MARKET_FIXTURE')) {
       const t = ticker.toUpperCase();
       if (!/^[A-Z0-9]{2,12}$/.test(t)) {
@@ -258,40 +166,5 @@ export class MarketService {
         ticker,
       });
     return exact;
-  }
-
-  private parseQuote(ticker: string, raw: unknown): Quote | null {
-    const r = raw as {
-      regularMarketPrice?: number;
-      regularMarketChangePercent?: number;
-      currency?: string;
-      regularMarketTime?: Date | string;
-    };
-    if (typeof r?.regularMarketPrice !== 'number') return null;
-    const ts =
-      r.regularMarketTime instanceof Date
-        ? r.regularMarketTime
-        : new Date(r.regularMarketTime ?? Date.now());
-    return {
-      ticker,
-      price: r.regularMarketPrice,
-      changePct: r.regularMarketChangePercent ?? 0,
-      currency: r.currency ?? 'BRL',
-      lastUpdate: ts.toISOString(),
-    };
-  }
-
-  private periodToDates(p: OhlcPeriod): { period1: Date } {
-    const now = new Date();
-    const start = new Date(now);
-    const map: Record<OhlcPeriod, number> = {
-      '7d': 7,
-      '30d': 30,
-      '6m': 183,
-      '1a': 365,
-      '5a': 1825,
-    };
-    start.setDate(start.getDate() - map[p]);
-    return { period1: start };
   }
 }
