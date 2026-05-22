@@ -14,6 +14,7 @@ const messages = {
       placeholder: 'Buscar ticker...',
       loading: 'Carregando...',
       empty: 'Nenhum resultado.',
+      error: 'Busca indisponível.',
     },
   },
 };
@@ -43,6 +44,23 @@ describe('TickerSearchInput', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'PETR' } });
     await waitFor(() => expect(screen.getByText('PETR4')).toBeInTheDocument());
     expect(screen.getByText('PETR3')).toBeInTheDocument();
+  });
+
+  it('mostra mensagem de erro quando a busca falha (upstream 503)', async () => {
+    (useTickerSearch as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: Object.assign(new Error('Busca de ativos indisponível'), {
+        statusCode: 503,
+      }),
+    });
+    render(
+      <Wrapper>
+        <TickerSearchInput value={null} onChange={() => {}} />
+      </Wrapper>,
+    );
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'PETR' } });
+    expect(await screen.findByText('Busca indisponível.')).toBeInTheDocument();
   });
 
   it('chama onChange ao selecionar', async () => {

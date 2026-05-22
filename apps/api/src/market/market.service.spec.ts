@@ -90,6 +90,32 @@ describe('MarketService', () => {
     });
   });
 
+  it('search: propaga 503 quando Yahoo lança', async () => {
+    yf.search.mockRejectedValueOnce(new Error('fetch failed'));
+    await expect(service.search('PETR')).rejects.toMatchObject({
+      status: 503,
+    });
+  });
+
+  it('search: não cacheia resultado vazio', async () => {
+    yf.search.mockResolvedValueOnce({ quotes: [] });
+    yf.search.mockResolvedValueOnce({
+      quotes: [
+        {
+          symbol: 'PETR4.SA',
+          shortname: 'Petrobras PN',
+          quoteType: 'EQUITY',
+          exchange: 'SAO',
+        },
+      ],
+    });
+    const first = await service.search('PETR');
+    const second = await service.search('PETR');
+    expect(first).toEqual([]);
+    expect(second).toHaveLength(1);
+    expect(yf.search).toHaveBeenCalledTimes(2);
+  });
+
   it('validateTicker: retorna asset quando search devolve match', async () => {
     yf.search.mockResolvedValueOnce({
       quotes: [

@@ -1,6 +1,7 @@
 import {
   Injectable,
   Logger,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -54,47 +55,57 @@ export class MarketService {
     const key = `${q.toUpperCase()}:${limit}`;
     const hit = this.searchCache.get(key);
     if (hit) return hit;
+    let res: { quotes?: unknown[] };
     try {
-      const res = await yf.search(q, { newsCount: 0 });
-      type QuoteItem = {
-        symbol?: string;
-        shortname?: string;
-        longname?: string;
-        quoteType?: string;
-        exchange?: string;
-      };
-      const rawQuotes = (res.quotes ?? []).map((x) => x as QuoteItem);
-      const out: MarketAsset[] = rawQuotes
-        .filter(
-          (it): it is QuoteItem & { symbol: string } =>
-            typeof it.symbol === 'string',
-        )
-        .slice(0, limit)
-        .map((it) => {
-          const ticker = it.symbol
-            .replace(/\.SA$/, '')
-            .replace(/-USD$/, '')
-            .replace(/BRL=X$/, '');
-          return {
-            ticker: ticker.toUpperCase(),
-            name: it.shortname ?? it.longname ?? it.symbol,
-            assetClass: inferAssetClass(ticker, {
-              quoteType: it.quoteType,
-              exchange: it.exchange,
-            }),
-            exchange: it.exchange ?? null,
-          };
-        });
-      this.searchCache.set(key, out);
-      return out;
+      res = await yf.search(q, { newsCount: 0 });
     } catch (err) {
-      this.logger.warn({
+      // Falha upstream (Yahoo offline, crumb/cookie inválido, rate-limit, rede).
+      // Antes engolíamos como `[]`, o que cacheava o vazio e mascarava a falha.
+      // Agora propaga 503 pro cliente distinguir indisponível de "sem resultado".
+      this.logger.error({
         event: 'market.search.failed',
         q,
         err: (err as Error).message,
       });
-      return [];
+      throw new ServiceUnavailableException({
+        statusCode: 503,
+        message: 'Busca de ativos indisponível',
+        upstream: 'yahoo-finance',
+      });
     }
+    type QuoteItem = {
+      symbol?: string;
+      shortname?: string;
+      longname?: string;
+      quoteType?: string;
+      exchange?: string;
+    };
+    const rawQuotes = (res.quotes ?? []).map((x) => x as QuoteItem);
+    const out: MarketAsset[] = rawQuotes
+      .filter(
+        (it): it is QuoteItem & { symbol: string } =>
+          typeof it.symbol === 'string',
+      )
+      .slice(0, limit)
+      .map((it) => {
+        const ticker = it.symbol
+          .replace(/\.SA$/, '')
+          .replace(/-USD$/, '')
+          .replace(/BRL=X$/, '');
+        return {
+          ticker: ticker.toUpperCase(),
+          name: it.shortname ?? it.longname ?? it.symbol,
+          assetClass: inferAssetClass(ticker, {
+            quoteType: it.quoteType,
+            exchange: it.exchange,
+          }),
+          exchange: it.exchange ?? null,
+        };
+      });
+    // Não cachear vazio — uma falha transitória que retorne 0 itens não pode
+    // congelar a busca por 1h pra essa query.
+    if (out.length > 0) this.searchCache.set(key, out);
+    return out;
   }
 
   async quote(ticker: string): Promise<Quote | null> {
