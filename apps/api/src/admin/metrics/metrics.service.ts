@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -11,19 +11,32 @@ import type {
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
+const EMPTY_QUEUE_METRICS: QueueMetrics = {
+  waiting: 0,
+  active: 0,
+  completed: 0,
+  failed: 0,
+  delayed: 0,
+  paused: 0,
+};
+
 @Injectable()
 export class MetricsService {
   private readonly logger = new Logger(MetricsService.name);
 
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue(EXAMPLE_QUEUE_NAME) private readonly exampleQueue: Queue,
+    @Optional()
+    @InjectQueue(EXAMPLE_QUEUE_NAME)
+    private readonly exampleQueue?: Queue,
   ) {}
 
   async getMetrics(): Promise<MetricsResponseDto> {
     const [users, exampleQueue] = await Promise.all([
       this.getUserMetrics(),
-      this.getQueueMetrics(this.exampleQueue),
+      this.exampleQueue
+        ? this.getQueueMetrics(this.exampleQueue)
+        : Promise.resolve(EMPTY_QUEUE_METRICS),
     ]);
 
     return {
@@ -62,14 +75,7 @@ export class MetricsService {
       };
     } catch (err) {
       this.logger.warn('Queue metrics unavailable (Redis unreachable)', err);
-      return {
-        waiting: 0,
-        active: 0,
-        completed: 0,
-        failed: 0,
-        delayed: 0,
-        paused: 0,
-      };
+      return EMPTY_QUEUE_METRICS;
     }
   }
 }

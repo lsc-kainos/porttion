@@ -35,6 +35,10 @@ async function bootstrap() {
     credentials: false,
   });
 
+  if (config.get<boolean>('QUEUE_ENABLED') === false) {
+    logger.warn('Queue disabled (QUEUE_ENABLED=false) — BullMQ/Redis offline');
+  }
+
   const port = config.get<number>('PORT') ?? 3001;
   await app.listen(port);
   logger.log(`API running on http://localhost:${port}`);

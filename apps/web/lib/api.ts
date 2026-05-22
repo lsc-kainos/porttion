@@ -2,6 +2,7 @@ import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 import { headers, cookies } from 'next/headers';
 import { env } from './env';
+import { fetchWithFallback } from './fetch-with-fallback';
 
 async function resolveToken(req?: NextRequest): Promise<string | null> {
   if (req) {
@@ -30,14 +31,20 @@ export async function apiFetch(
   req?: NextRequest,
 ): Promise<Response> {
   const token = await resolveToken(req);
-  return fetch(`${env.API_URL}${path}`, {
-    ...init,
-    headers: {
-      ...(init.headers ?? {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      'Content-Type': 'application/json',
+  return fetchWithFallback({
+    primary: env.API_URL,
+    fallback: env.NEXT_PUBLIC_API_URL,
+    path,
+    init: {
+      ...init,
+      headers: {
+        ...(init.headers ?? {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
     },
-    cache: 'no-store',
+    label: 'api-proxy',
   });
 }
 
@@ -50,12 +57,18 @@ export async function apiUpload(
   req?: NextRequest,
 ): Promise<Response> {
   const token = await resolveToken(req);
-  return fetch(`${env.API_URL}${path}`, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  return fetchWithFallback({
+    primary: env.API_URL,
+    fallback: env.NEXT_PUBLIC_API_URL,
+    path,
+    init: {
+      method: 'POST',
+      body: formData,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      cache: 'no-store',
     },
-    cache: 'no-store',
+    label: 'api-upload',
   });
 }

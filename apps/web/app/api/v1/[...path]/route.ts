@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { apiFetch } from '@/lib/api';
+import { describeCause, isNetworkError } from '@/lib/fetch-with-fallback';
 
 // Catch-all proxy do web pra API. Encaminha GET/POST/PATCH/DELETE de
 // /api/v1/* mantendo o JWT no Authorization (apiFetch resolve via cookie).
@@ -18,12 +19,36 @@ async function proxy(req: NextRequest, ctx: Ctx, method: string): Promise<Respon
   if (method !== 'GET' && method !== 'DELETE') {
     init.body = await req.text();
   }
-  const r = await apiFetch(target, init, req);
-  const body = await r.text();
-  return new NextResponse(body, {
-    status: r.status,
-    headers: { 'Content-Type': r.headers.get('content-type') ?? 'application/json' },
-  });
+  try {
+    const r = await apiFetch(target, init, req);
+    const body = await r.text();
+    return new NextResponse(body, {
+      status: r.status,
+      headers: { 'Content-Type': r.headers.get('content-type') ?? 'application/json' },
+    });
+  } catch (err) {
+    // apiFetch já tentou URL primária e fallback. Se ambas falharam por
+    // rede, devolvemos 502 estruturado em vez do 500 vazio do Next.
+    if (isNetworkError(err)) {
+      const cause = describeCause(err);
+      console.error('[api-proxy] upstream unreachable', {
+        method,
+        path: target,
+        code: cause.code,
+        address: cause.address,
+        message: cause.message,
+      });
+      return NextResponse.json(
+        {
+          statusCode: 502,
+          message: 'API indisponível',
+          code: cause.code ?? 'UPSTREAM_UNREACHABLE',
+        },
+        { status: 502 },
+      );
+    }
+    throw err;
+  }
 }
 
 export const GET = (req: NextRequest, ctx: Ctx): Promise<Response> => proxy(req, ctx, 'GET');
