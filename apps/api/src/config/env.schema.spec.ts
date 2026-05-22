@@ -144,6 +144,30 @@ describe('validateEnv', () => {
     });
   });
 
+  describe('Market driver', () => {
+    it('default MARKET_DRIVER=yahoo, sem token exigido', () => {
+      const env = validateEnv(validRaw);
+      expect(env.MARKET_DRIVER).toBe('yahoo');
+      expect(env.BRAPI_BASE_URL).toBe('https://brapi.dev/api');
+    });
+
+    it('exige BRAPI_TOKEN quando MARKET_DRIVER=brapi', () => {
+      expect(() =>
+        validateEnv({ ...validRaw, MARKET_DRIVER: 'brapi' }),
+      ).toThrow(/BRAPI_TOKEN/);
+    });
+
+    it('aceita MARKET_DRIVER=brapi com token', () => {
+      expect(() =>
+        validateEnv({
+          ...validRaw,
+          MARKET_DRIVER: 'brapi',
+          BRAPI_TOKEN: 'tk-test',
+        }),
+      ).not.toThrow();
+    });
+  });
+
   describe('Bull Board', () => {
     it('exige basic auth user/password quando BULL_BOARD_ENABLED=true', () => {
       expect(() =>
