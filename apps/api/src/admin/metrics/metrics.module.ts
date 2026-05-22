@@ -6,12 +6,16 @@ import { AuthModule } from '../../auth/auth.module';
 import { MetricsService } from './metrics.service';
 import { MetricsController } from './metrics.controller';
 
+// Quando QUEUE_ENABLED=false, BullModule global não está registrado.
+// Pulamos registerQueue aqui também — MetricsService injeta o queue
+// com @Optional() e devolve zeros quando ausente.
+const queueImports =
+  process.env.QUEUE_ENABLED !== 'false'
+    ? [BullModule.registerQueue({ name: EXAMPLE_QUEUE_NAME })]
+    : [];
+
 @Module({
-  imports: [
-    BullModule.registerQueue({ name: EXAMPLE_QUEUE_NAME }),
-    PrismaModule,
-    AuthModule,
-  ],
+  imports: [...queueImports, PrismaModule, AuthModule],
   providers: [MetricsService],
   controllers: [MetricsController],
 })

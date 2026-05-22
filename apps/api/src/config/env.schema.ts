@@ -59,7 +59,13 @@ export const envSchema = z
       .default(false),
 
     // --- Fila distribuída (BullMQ) ---
-    REDIS_URL: z.string().url().default('redis://localhost:6379'),
+    // QUEUE_ENABLED desliga BullModule/QueueModule inteiros. Em ambientes
+    // sem Redis (ex.: staging temporário), deixe false pra evitar loop
+    // infinito de reconexão ECONNREFUSED nos logs.
+    QUEUE_ENABLED: z
+      .preprocess((v) => v === 'true' || v === true, z.boolean())
+      .default(true),
+    REDIS_URL: z.string().url().optional().default('redis://localhost:6379'),
     BULL_BOARD_ENABLED: z
       .preprocess((v) => v === 'true' || v === true, z.boolean())
       .default(false),
@@ -103,6 +109,20 @@ export const envSchema = z
           });
         }
       }
+    }
+    if (env.QUEUE_ENABLED && !env.REDIS_URL) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['REDIS_URL'],
+        message: 'REDIS_URL é obrigatória quando QUEUE_ENABLED=true',
+      });
+    }
+    if (env.BULL_BOARD_ENABLED && !env.QUEUE_ENABLED) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['BULL_BOARD_ENABLED'],
+        message: 'BULL_BOARD_ENABLED exige QUEUE_ENABLED=true',
+      });
     }
     if (env.BULL_BOARD_ENABLED && !env.BULL_BOARD_BASIC_AUTH_USER) {
       ctx.addIssue({

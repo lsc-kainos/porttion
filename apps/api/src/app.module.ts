@@ -31,12 +31,18 @@ import { AiAnalystModule } from './ai-analyst/ai-analyst.module';
       isGlobal: true,
       validate: validateEnv,
     }),
-    BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => ({
-        connection: { url: cfg.getOrThrow<string>('REDIS_URL') },
-      }),
-    }),
+    // BullModule fica fora do array quando QUEUE_ENABLED=false pra evitar
+    // que ioredis tente reconectar em loop num Redis inexistente.
+    ...(process.env.QUEUE_ENABLED !== 'false'
+      ? [
+          BullModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (cfg: ConfigService) => ({
+              connection: { url: cfg.getOrThrow<string>('REDIS_URL') },
+            }),
+          }),
+        ]
+      : []),
     ThrottlerModule.forRoot([
       // Limites generosos: propósito é cortar abuso de API, não constranger
       // uso real. Ajuste por feature conforme adicionar buckets.
@@ -53,7 +59,7 @@ import { AiAnalystModule } from './ai-analyst/ai-analyst.module';
     EmailVerificationModule,
     UsersModule,
     StorageModule,
-    QueueModule,
+    ...(process.env.QUEUE_ENABLED !== 'false' ? [QueueModule] : []),
     AiRuntimeModule,
     MetricsModule,
     MarketModule,
