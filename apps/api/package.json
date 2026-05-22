@@ -21,7 +21,8 @@
     "dev": "nest start --watch",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "seed:carteira-grupo-04": "tsx prisma/seeds/carteira-grupo-04.ts"
+    "seed:carteira-grupo-04": "tsx prisma/seeds/carteira-grupo-04.ts",
+    "seed:carteira-grupo-04-movimentos": "tsx prisma/seeds/carteira-grupo-04-movimentos.ts"
   },
   "prisma": {
     "schema": "prisma/schema.prisma",
